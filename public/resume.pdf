@@ -1,0 +1,53 @@
+HAWA EBRAHIM HAMID
+AI Engineer & Full-Stack Developer | Generative AI, RAG & Web Applications
+Addis Ababa, Ethiopia • +251 991 864 954 • hawaebrahimhamid@gmail.com • LinkedIn: linkedin.com/in/hawa-ebrahim-hamid •
+GitHub: github.com/hawaebrahimhamid
+SUMMARY
+AI Engineer and Full-Stack Developer with hands-on experience building and deploying AI-powered applications using Python, RAG, LLMs, embeddings, React,
+Next.js, Flask, and REST APIs. Built financial RAG, computer-vision, and full-stack applications, combining AI workflows with practical software engineering and
+deployment.
+TECHNICAL SKILLS
+Generative AI: RAG, LLMs, Text Embeddings, Sentence Transformers, Prompt Engineering, FAISS
+Programming: Python, JavaScript, SQL
+Frontend: React, Next.js, HTML, CSS
+Backend: Node.js, Express, Flask, FastAPI, REST APIs
+AI & Data: YOLOv8, PyMC, Pandas, NumPy, PostgreSQL, ETL
+Engineering: Git, GitHub, Docker, GitHub Actions, pytest, Automated Testing
+Deployment: Streamlit, Vercel, Netlify, Render
+EXPERIENCE
+AI & Machine Learning Engineer — Project-Based May 2026 – Present | Addis Ababa / Remote
+Completed the Kifiya AI Mastery Program in 2026 and continue developing project-based AI, machine learning, and software applications.
+Build AI/ML solutions using Python, SQL, RAG, LLMs, data engineering, and REST APIs.
+Develop and deploy applications involving embeddings, vector retrieval, backend APIs, and machine learning workflows.
+Apply Git/GitHub, Docker, automated testing, CI/CD, and cloud deployment across projects.
+Full-Stack Developer — Independent Software Projects 2024 – Present | Addis Ababa / Remote
+Built and deployed full-stack applications using React, Next.js, JavaScript, Node.js, Express, Python, Flask, REST APIs, and databases.
+Developed responsive frontend interfaces, backend services, authentication flows, API integrations, and database-backed features.
+Integrated AI and data-processing workflows into web applications and managed development using Git/GitHub and cloud deployment platforms.
+SELECTED PROJECTS
+CrediTrust Complaint Assistant — Financial RAG System
+Live Demo: creditrust-complaint-chatbot.streamlit.app | GitHub: github.com/hawaebrahimhamid/rag-complaint-chatbot
+Built and deployed a financial RAG assistant for customer complaint analysis using text chunking, Sentence Transformer embeddings, FAISS vector retrieval, Top-K
+search, and LLM generation.
+Implemented source attribution, answer-quality validation, and evidence-grounded fallback handling to improve response grounding and reliability.
+Added automated tests and GitHub Actions CI to validate core RAG application behavior.
+Medical Telegram Warehouse & AI Pipeline
+GitHub: github.com/hawaebrahimhamid/medical-telegram-warehouse
+Built an end-to-end Python pipeline that ingests Telegram messages and product images, applies YOLOv8 object detection and confidence scoring, and stores
+enriched results in PostgreSQL.
+Developed dbt models and FastAPI analytical endpoints to transform and expose combined message and computer-vision insights.
+Orchestrated data ingestion, database loading, transformation, and image-processing workflows using Dagster.
+Brent Oil Change Point Analysis Dashboard
+Live Demo: brent-oil-dashboard.vercel.app | GitHub: github.com/hawaebrahimhamid/brent-oil-change-point-analysis
+Built and deployed a full-stack analytics dashboard using React, Flask, Python, and PyMC for historical Brent crude oil price analysis.
+Developed REST API endpoints connecting analytical processing with an interactive frontend.
+Implemented Bayesian change-point analysis to identify structural changes in historical price data.
+EDUCATION
+Kifiya AI Mastery Program (KAIM 9) | 10 Academy Completed 2026 | Remote
+Intensive engineering fellowship focused on Generative AI, Machine Learning Engineering, Data Engineering, RAG Systems, Data Warehousing, MLOps, and Full-Stack
+Development.
+Awarded with distinction upon completion.
+BSc in Geology | Bahir Dar University 2020 – 2023
+LANGUAGES
+Amharic — Native | English — Professional Working Proficiency
+Hawa Ebrahim Hamid — AI Engineer & Full-Stack Developer Resume 
