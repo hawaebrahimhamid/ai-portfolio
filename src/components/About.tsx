@@ -12,8 +12,11 @@ export default function About() {
           </p>
 
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-            Building practical software with AI and modern web technologies.
-          </h2>
+  Building practical software with{" "}
+  <span className="text-blue-600 dark:text-blue-400">
+    AI and modern web technologies.
+  </span>
+</h2>
 
           <p className="mt-5 text-base leading-7 text-gray-600 dark:text-gray-300 sm:text-lg">
             I am an AI Engineer and Full-Stack Developer focused on building
