@@ -21,7 +21,7 @@ export default function Hero() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <section className="py-16 sm:py-20 lg:py-24">
+    <section className="py-11 sm:py-15 lg:py-19">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left Content */}
@@ -61,7 +61,7 @@ export default function Hero() {
               variants={fadeUp}
               className="mt-5 text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300 sm:text-base"
             >
-              Generative AI · RAG · LLM Applications · Web Applications
+             Generative AI · RAG · LLM Applications · Full-Stack Engineering
             </motion.p>
 
             {/* Description */}
@@ -69,9 +69,7 @@ export default function Hero() {
               variants={fadeUp}
               className="mt-5 max-w-xl text-base leading-7 text-gray-600 dark:text-gray-300"
             >
-              I build AI-powered and full-stack applications using Generative
-              AI, RAG, Python, React, and backend APIs to turn real-world
-              problems into practical software solutions.
+             I combine Generative AI with modern software engineering to build practical applications using Python, React, and backend APIs.
             </motion.p>
 
             {/* CTA Buttons */}
