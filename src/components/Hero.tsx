@@ -40,7 +40,14 @@ export default function Hero() {
             {/* Professional Title */}
             <motion.p
               variants={fadeUp}
-              className="text-sm font-semibold uppercase tracking-[0.15em] text-blue-600 dark:text-blue-400"
+              className="text-base font-semibold tracking-tight text-gray-900 dark:text-white sm:text-lg"
+            >
+              Hawa Ebrahim
+            </motion.p>
+
+            <motion.p
+              variants={fadeUp}
+              className="mt-2 text-sm font-semibold uppercase tracking-[0.15em] text-blue-600 dark:text-blue-400"
             >
               AI Engineer & Full-Stack Developer
             </motion.p>
@@ -50,7 +57,7 @@ export default function Hero() {
               variants={fadeUp}
               className="mt-6 text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-[64px] xl:text-[72px]"
             >
-              Building AI-Powered
+              I Build AI-Powered
               <span className="block text-blue-600 dark:text-blue-400">
                 Web Applications.
               </span>
@@ -61,7 +68,7 @@ export default function Hero() {
               variants={fadeUp}
               className="mt-5 text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300 sm:text-base"
             >
-             Generative AI · RAG · LLM Applications · Full-Stack Engineering
+              Generative AI · RAG · LLM Applications · Full-Stack Engineering
             </motion.p>
 
             {/* Description */}
@@ -69,7 +76,9 @@ export default function Hero() {
               variants={fadeUp}
               className="mt-5 max-w-xl text-base leading-7 text-gray-600 dark:text-gray-300"
             >
-             I combine Generative AI with modern software engineering to build practical applications using Python, React, and backend APIs.
+              I build practical software applications that combine Generative
+              AI, Python backends, and modern web technologies to solve
+              real-world problems.
             </motion.p>
 
             {/* CTA Buttons */}
