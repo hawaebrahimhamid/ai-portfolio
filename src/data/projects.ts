@@ -15,7 +15,7 @@ export const projects: Project[] = [
     ],
     githubUrl: "https://github.com/hawaebrahimhamid/rag-complaint-chatbot",
     liveUrl: "https://creditrust-complaint-chatbot.streamlit.app/",
-    image: "/projects/creditrust.png",
+    videoUrl: "/projects/creditrust-demo.mp4",
     featured: true,
   },
   {

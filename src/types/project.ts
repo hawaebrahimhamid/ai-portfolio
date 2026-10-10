@@ -4,6 +4,7 @@ export type Project = {
   technologies: string[];
   githubUrl: string;
   liveUrl?: string;
-  image: string;
+  image?: string;
+  videoUrl?: string;
   featured?: boolean;
 };
