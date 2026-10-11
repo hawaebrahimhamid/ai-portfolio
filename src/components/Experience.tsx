@@ -1,10 +1,22 @@
-const experiences = [
+import { FiExternalLink } from "react-icons/fi";
+
+interface ExperienceItem {
+  role: string;
+  period: string;
+  location: string;
+  description: string;
+  certificateUrl?: string; // Optional certificate link
+  highlights: string[];
+}
+
+const experiences: ExperienceItem[] = [
   {
     role: "AI & Machine Learning Engineer — Project-Based",
     period: "May 2026 – Present",
     location: "Addis Ababa / Remote",
     description:
       "Completed the Kifiya AI Mastery Program in 2026 and continue developing project-based AI, machine learning, and software applications.",
+    certificateUrl: "/certificates/kifiya-ai-mastery.pdf",
     highlights: [
       "Build AI and machine learning applications using Python, SQL, RAG, LLMs, data engineering, and REST APIs.",
       "Develop applications involving embeddings, vector retrieval, backend APIs, and machine learning workflows.",
@@ -52,14 +64,13 @@ export default function Experience() {
         </div>
 
         <div className="relative mt-12">
+          {/* Vertical Timeline Line */}
           <div className="absolute left-[7px] top-2 hidden h-[calc(100%-8px)] w-px bg-gray-200 dark:bg-slate-800 sm:block" />
 
           <div className="space-y-12">
             {experiences.map((experience) => (
-              <article
-                key={experience.role}
-                className="relative sm:pl-12"
-              >
+              <article key={experience.role} className="relative sm:pl-12">
+                {/* Timeline Dot */}
                 <div className="absolute left-0 top-2 hidden h-4 w-4 rounded-full border-4 border-white bg-blue-600 dark:border-slate-950 dark:bg-blue-400 sm:block" />
 
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900 sm:p-8">
@@ -83,6 +94,7 @@ export default function Experience() {
                     {experience.description}
                   </p>
 
+                  {/* Highlights Bullet List */}
                   <ul className="mt-6 space-y-3">
                     {experience.highlights.map((highlight) => (
                       <li
@@ -97,6 +109,21 @@ export default function Experience() {
                       </li>
                     ))}
                   </ul>
+
+                  {/* Optional Certificate Link Button */}
+                  {experience.certificateUrl && (
+                    <div className="mt-6 border-t border-gray-100 pt-4 dark:border-slate-800/80">
+                      <a
+                        href={experience.certificateUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-2.5 text-sm font-medium text-blue-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-100/70 hover:shadow-md dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:border-blue-800 dark:hover:bg-blue-900/50"
+                      >
+                        <FiExternalLink className="h-4 w-4" />
+                        View Certificate
+                      </a>
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
