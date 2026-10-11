@@ -192,7 +192,7 @@ export default function Hero() {
                   />
 
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Building AI & full-stack applications
+                    Available for AI & Full-Stack roles
                   </p>
                 </div>
               </div>
