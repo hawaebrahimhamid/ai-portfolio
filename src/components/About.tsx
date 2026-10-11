@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function About() {
   return (
     <section
@@ -12,38 +14,43 @@ export default function About() {
           </p>
 
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-  Building practical software with{" "}
-  <span className="text-blue-600 dark:text-blue-400">
-    AI and modern web technologies.
-  </span>
-</h2>
+            Building practical software with{" "}
+            <span className="text-blue-600 dark:text-blue-400">
+              AI and modern web technologies.
+            </span>
+          </h2>
 
           <p className="mt-5 text-base leading-7 text-gray-600 dark:text-gray-300 sm:text-lg">
             I am an AI Engineer and Full-Stack Developer focused on building
-AI-powered applications that combine Generative AI, machine
-learning, backend systems, and modern web development.
+            AI-powered applications that combine Generative AI, machine
+            learning, backend systems, and modern web development.
           </p>
         </div>
 
-        {/* Main content */}
-        <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-16">
+        {/* Main content grid */}
+        <div className="mt-12 grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+          {/* Column 1: Who I am */}
           <div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               Who I am
             </h3>
 
             <p className="mt-4 leading-7 text-gray-600 dark:text-gray-300">
-              I build and deploy software that connects intelligent systems
-with practical applications. My work spans RAG
-applications, machine learning workflows, data pipelines,
-backend APIs, and full-stack web applications.
+              I build and deploy software that connects intelligent systems with
+              practical applications. My work spans RAG applications, machine
+              learning workflows, data pipelines, backend APIs, and full-stack
+              web applications.
             </p>
 
             <p className="mt-4 leading-7 text-gray-600 dark:text-gray-300">
-              My engineering approach combines AI development with modern software engineering, using Python, React, Next.js, and backend technologies to work across the stack—from data and backend services to user-facing interfaces.
+              My engineering approach combines AI development with modern
+              software engineering, using Python, React, Next.js, and backend
+              technologies to work across the stack—from data and backend
+              services to user-facing interfaces.
             </p>
           </div>
 
+          {/* Column 2: What I build */}
           <div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               What I build
@@ -57,7 +64,8 @@ backend APIs, and full-stack web applications.
 
                 <p className="mt-2 leading-7 text-gray-600 dark:text-gray-300">
                   Building LLM-powered applications using RAG, embeddings,
-vector retrieval, prompt engineering, and evidence-grounded responses.
+                  vector retrieval, prompt engineering, and evidence-grounded
+                  responses.
                 </p>
               </div>
 
@@ -68,7 +76,8 @@ vector retrieval, prompt engineering, and evidence-grounded responses.
 
                 <p className="mt-2 leading-7 text-gray-600 dark:text-gray-300">
                   Building responsive web applications with React, Next.js,
-Python, REST APIs, databases, authentication, and third-party integrations.
+                  Python, REST APIs, databases, authentication, and third-party
+                  integrations.
                 </p>
               </div>
 
@@ -79,7 +88,7 @@ Python, REST APIs, databases, authentication, and third-party integrations.
 
                 <p className="mt-2 leading-7 text-gray-600 dark:text-gray-300">
                   Designing maintainable systems with clear architecture,
-testing, version control, CI/CD, and deployment practices.
+                  testing, version control, CI/CD, and deployment practices.
                 </p>
               </div>
             </div>
