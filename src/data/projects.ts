@@ -18,6 +18,14 @@ export const projects: Project[] = [
     liveUrl: "https://creditrust-complaint-chatbot.streamlit.app/",
     videoUrl: "/projects/creditrust-demo.mp4",
     featured: true,
+    caseStudy: {
+      problem:
+        "Consumer financial complaints can be difficult to search and interpret. The goal was to help users find relevant complaints and receive answers grounded in supporting evidence.",
+      approach:
+        "Developed a retrieval-augmented generation (RAG) pipeline using Sentence Transformers for semantic search, FAISS for similarity retrieval, and FLAN-T5 for answer generation.",
+      implementation:
+        "Implemented relevance checks, complaint-source references, answer validation, and evidence-grounded fallback handling to improve answer reliability and reduce unsupported responses.",
+    },
   },
 
   {

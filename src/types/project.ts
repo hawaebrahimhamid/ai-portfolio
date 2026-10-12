@@ -7,4 +7,9 @@ export type Project = {
   image?: string;
   videoUrl?: string;
   featured?: boolean;
+  caseStudy?: {
+    problem: string;
+    approach: string;
+    implementation: string;
+  };
 };
