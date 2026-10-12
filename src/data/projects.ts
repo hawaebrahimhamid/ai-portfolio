@@ -4,20 +4,22 @@ export const projects: Project[] = [
   {
     title: "CrediTrust Complaint Assistant",
     description:
-      "A financial RAG application that retrieves relevant customer complaint information and generates evidence-grounded responses using semantic search and language models.",
+      "Built a RAG assistant that retrieves relevant consumer financial complaints and generates evidence-informed answers. Implemented semantic search using Sentence Transformers and FAISS, FLAN-T5 answer generation, relevance checks, source display, and evidence-grounded fallback handling.",
     technologies: [
       "Python",
       "RAG",
       "Sentence Transformers",
       "FAISS",
-      "LLMs",
+      "FLAN-T5",
       "Streamlit",
+      "Pytest",
     ],
     githubUrl: "https://github.com/hawaebrahimhamid/rag-complaint-chatbot",
     liveUrl: "https://creditrust-complaint-chatbot.streamlit.app/",
     videoUrl: "/projects/creditrust-demo.mp4",
     featured: true,
   },
+
   {
     title: "Medical Telegram Warehouse & AI Pipeline",
     description:
