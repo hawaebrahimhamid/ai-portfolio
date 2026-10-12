@@ -13,11 +13,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
-  title: "Hawa.dev | AI Engineer Portfolio",
+  title: "Hawa Ebrahim Hamid | AI Engineer & Full-Stack Developer",
   description:
-    "Generative AI & Full-Stack Engineer building AI-powered applications and RAG systems.",
+    "Explore Hawa Ebrahim Hamid's portfolio of AI-powered applications, RAG systems, full-stack web development, Python, React, and Next.js projects.",
 };
+
 
 export default function RootLayout({
   children,
