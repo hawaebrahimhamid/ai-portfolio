@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
-import { Menu } from "lucide-react";
+import { Menu, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 import {
@@ -14,6 +14,7 @@ import {
 
 export default function Navbar() {
   const [activeSection, setActiveSection] = useState("about");
+  const [resumeMenuOpen, setResumeMenuOpen] = useState(false);
 
   useEffect(() => {
     const sections = document.querySelectorAll("section[id]");
@@ -80,9 +81,7 @@ export default function Navbar() {
 
                   <span
                     className={`absolute bottom-0 left-1/2 h-0.5 -translate-x-1/2 rounded-full bg-blue-600 transition-all duration-200 dark:bg-blue-400 ${
-                      isActive
-                        ? "w-full"
-                        : "w-0 group-hover:w-full"
+                      isActive ? "w-full" : "w-0 group-hover:w-full"
                     }`}
                   />
                 </a>
@@ -118,12 +117,55 @@ export default function Navbar() {
             </a>
 
             {/* Resume */}
-            <a
-              href="/resume.pdf"
-              className="ml-1 whitespace-nowrap rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-md dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
-            >
-              Resume
-            </a>
+
+            {/* Desktop Resume Dropdown */}
+            <div className="relative ml-1 group">
+              <button
+                type="button"
+                aria-haspopup="true"
+                className="flex items-center gap-2 whitespace-nowrap rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+              >
+                Resume
+                <ChevronDown size={16} />
+              </button>
+
+              <div className="invisible absolute right-0 top-full z-50 w-72 pt-2 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                <div className="rounded-xl border border-gray-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                  <a
+                    href="/resume.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-lg px-3 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
+                  >
+                    <span className="block font-semibold">
+                      AI Engineer & Full-Stack Developer Resume
+                    </span>
+                  </a>
+
+                  <a
+                    href="/full-stack-engineer-resume.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-lg px-3 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
+                  >
+                    <span className="block font-semibold">
+                      Full-Stack Engineer Resume
+                    </span>
+                  </a>
+
+                  <a
+                    href="/ai-ml-engineer-resume.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-lg px-3 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
+                  >
+                    <span className="block font-semibold">
+                      AI/ML Engineer Resume
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Theme Toggle */}
@@ -146,8 +188,7 @@ export default function Navbar() {
                 {/* Mobile Navigation */}
                 <div className="flex flex-col">
                   {navItems.map((item) => {
-                    const isActive =
-                      activeSection === item.href.slice(1);
+                    const isActive = activeSection === item.href.slice(1);
 
                     return (
                       <a
@@ -188,15 +229,39 @@ export default function Navbar() {
                   </a>
                 </div>
 
-                {/* Mobile Resume */}
-                
+                {/* Mobile Resume Options */}
+                <div className="mt-6 flex flex-col gap-3">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Choose a Resume
+                  </p>
+
                   <a
                     href="/resume.pdf"
-                    className="mt-6 rounded-lg bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700"
                   >
-                    View Resume
+                    AI Engineer & Full-Stack Developer Resume
                   </a>
-                
+
+                  <a
+                    href="/full-stack-engineer-resume.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-700 dark:text-gray-200 dark:hover:bg-slate-800"
+                  >
+                    Full-Stack Engineer Resume
+                  </a>
+
+                  <a
+                    href="/ai-ml-engineer-resume.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-700 dark:text-gray-200 dark:hover:bg-slate-800"
+                  >
+                    AI/ML Engineer Resume
+                  </a>
+                </div>
               </nav>
             </SheetContent>
           </Sheet>
