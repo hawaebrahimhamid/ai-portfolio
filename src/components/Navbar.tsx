@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,38 +5,44 @@ import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { Menu, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function Navbar() {
-  const [activeSection, setActiveSection] = useState("about");
-  const [resumeMenuOpen, setResumeMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
+    // Select all sections with an id attribute
     const sections = document.querySelectorAll("section[id]");
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const visibleSection = entries.find(
-          (entry) => entry.isIntersecting,
-        );
-
-        if (visibleSection) {
-          setActiveSection(visibleSection.target.id);
-        }
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
       },
       {
-        rootMargin: "-20% 0px -60% 0px",
-        threshold: 0,
+        rootMargin: "-20% 0px -55% 0px", // Better viewport intersection margin
+        threshold: 0.1,
       },
     );
 
     sections.forEach((section) => observer.observe(section));
 
-    return () => observer.disconnect();
+    // Reset active highlight when scrolled back to the very top (Hero section)
+    const handleScroll = () => {
+      if (window.scrollY < 100) {
+        setActiveSection("");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const navItems = [
@@ -54,7 +59,8 @@ export default function Navbar() {
         {/* Logo */}
         <div className="shrink-0">
           <a
-            href="#"
+            href="#home"
+            onClick={() => setActiveSection("")}
             className="text-2xl font-bold tracking-tight text-gray-900 transition-colors duration-200 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 sm:text-[26px]"
           >
             Hawa<span className="text-blue-600 dark:text-blue-400">.dev</span>
@@ -115,8 +121,6 @@ export default function Navbar() {
             >
               <FaLinkedin size={22} />
             </a>
-
-            {/* Resume */}
 
             {/* Desktop Resume Dropdown */}
             <div className="relative ml-1 group">
@@ -270,4 +274,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
