@@ -22,7 +22,7 @@ export default function Hero() {
 
   return (
     // Added id="home" here so the scroll spy and navigation links track it correctly
-    <section id="home" className="py-11 sm:py-15 lg:py-19">
+    <section id="home" className="py-22 sm:py-26 lg:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left Content */}
