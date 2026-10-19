@@ -1,0 +1,200 @@
+
+from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime, timezone
+
+import pytest
+from fastapi.testclient import TestClient
+
+import main
+
+get_db = main.get_db
+
+
+class FakeContactMessage:
+    """Represent a saved message without using PostgreSQL."""
+
+    next_id = 1
+
+    def __init__(self, name, email, message):
+        self.id = FakeContactMessage.next_id
+        FakeContactMessage.next_id += 1
+        self.name = name
+        self.email = email
+        self.message = message
+        self.created_at = datetime.now(timezone.utc)
+
+
+class FakeDatabaseSession:
+    """Provide the small session interface used by the API."""
+
+    def __init__(self):
+        self.added_message = None
+        self.committed = False
+        self.rolled_back = False
+
+    def add(self, message):
+        self.added_message = message
+
+    def commit(self):
+        self.committed = True
+        self.added_message.id = FakeContactMessage.next_id
+        FakeContactMessage.next_id += 1
+        self.added_message.created_at = datetime.now(timezone.utc)
+
+    def refresh(self, message):
+        # Simulate the database returning its generated fields.
+        return None
+
+    def rollback(self):
+        self.rolled_back = True
+
+    def close(self):
+        return None
+
+
+@pytest.fixture
+def client():
+    """Create a test client with a fake database session."""
+    fake_db = FakeDatabaseSession()
+
+    def override_get_db():
+        yield fake_db
+
+    main.app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(main.app) as test_client:
+        yield test_client
+
+    main.app.dependency_overrides.clear()
+
+
+def test_health_endpoint(client):
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "healthy"
+
+
+def test_about_endpoint(client):
+    response = client.get("/api/about")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Hawa Ebrahim Hamid"
+    assert data["role"] == "AI Engineer & Full-Stack Developer"
+
+
+def test_valid_contact_message(client):
+    response = client.post(
+        "/api/contact",
+        json={
+            "name": "Test Visitor",
+            "email": "visitor@example.com",
+            "message": "I am testing the portfolio contact API.",
+        },
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "Test Visitor"
+    assert data["email"] == "visitor@example.com"
+    assert data["message"] == "I am testing the portfolio contact API."
+    assert "id" in data
+    assert "created_at" in data
+
+
+def test_whitespace_only_name_is_rejected(client):
+    response = client.post(
+        "/api/contact",
+        json={
+            "name": "   ",
+            "email": "visitor@example.com",
+            "message": "This is a valid-length message.",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_short_message_is_rejected(client):
+    response = client.post(
+        "/api/contact",
+        json={
+            "name": "Test Visitor",
+            "email": "visitor@example.com",
+            "message": "Hi.",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_invalid_email_is_rejected(client):
+    response = client.post(
+        "/api/contact",
+        json={
+            "name": "Test Visitor",
+            "email": "not-an-email",
+            "message": "This is a valid-length message.",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_missing_name_is_rejected(client):
+    response = client.post(
+        "/api/contact",
+        json={
+            "email": "visitor@example.com",
+            "message": "This is a valid-length message.",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_overlong_message_is_rejected(client):
+    response = client.post(
+        "/api/contact",
+        json={
+            "name": "Test Visitor",
+            "email": "visitor@example.com",
+            "message": "a" * 5001,
+        },
+    )
+
+    assert response.status_code == 422
+
+def test_database_error_returns_500_and_rolls_back():
+    fake_db = FakeDatabaseSession()
+
+    def override_get_db():
+        yield fake_db
+
+    def fail_commit():
+        raise SQLAlchemyError("Simulated database failure")
+
+    fake_db.commit = fail_commit
+    main.app.dependency_overrides[get_db] = override_get_db
+
+    try:
+        with TestClient(main.app) as test_client:
+            response = test_client.post(
+                "/api/contact",
+                json={
+                    "name": "Test Visitor",
+                    "email": "visitor@example.com",
+                    "message": "Testing database failure handling.",
+                },
+            )
+
+        assert response.status_code == 500
+        assert response.json()["detail"] == (
+            "Unable to save your message right now. "
+            "Please try again."
+        )
+        assert fake_db.rolled_back is True
+
+    finally:
+        main.app.dependency_overrides.clear()

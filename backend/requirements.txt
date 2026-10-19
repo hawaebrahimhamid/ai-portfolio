@@ -3,3 +3,4 @@ fastapi[standard]
 sqlalchemy
 psycopg[binary]
 python-dotenv
+email-validator
