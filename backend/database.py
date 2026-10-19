@@ -28,3 +28,7 @@ SessionLocal = sessionmaker(
 
 class Base(DeclarativeBase):
     pass
+
+
+def create_tables():
+    Base.metadata.create_all(bind=engine)
