@@ -51,3 +51,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Generated RAG embeddings
+/backend/knowledge/portfolio_embeddings.json

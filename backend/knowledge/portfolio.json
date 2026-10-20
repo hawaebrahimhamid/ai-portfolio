@@ -1,0 +1,126 @@
+{
+  "portfolio_owner": {
+    "name": "Hawa Ebrahim Hamid",
+    "role": "AI Engineer and Full-Stack Developer",
+    "location": "Addis Ababa, Ethiopia",
+    "professional_focus": [
+      "Generative AI and retrieval-augmented generation",
+      "Full-stack web development",
+      "Python backend development",
+      "Data engineering and machine learning"
+    ]
+  },
+  "skills": [
+    {
+      "category": "Generative AI",
+      "technologies": [
+        "RAG",
+        "LLMs",
+        "LangChain",
+        "Sentence Transformers",
+        "FAISS",
+        "Prompt Engineering"
+      ]
+    },
+    {
+      "category": "Backend Development",
+      "technologies": [
+        "Python",
+        "FastAPI",
+        "Flask",
+        "Node.js",
+        "Express",
+        "REST APIs"
+      ]
+    },
+    {
+      "category": "Frontend Development",
+      "technologies": [
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Next.js",
+        "HTML",
+        "CSS"
+      ]
+    },
+    {
+      "category": "Data and Databases",
+      "technologies": ["PostgreSQL", "MySQL", "Firestore", "SQL", "dbt", "ETL"]
+    }
+  ],
+  "projects": [
+    {
+      "id": "creditrust-complaint-assistant",
+      "name": "CrediTrust Complaint Assistant",
+      "description": "A retrieval-augmented generation application that helps users explore and understand customer complaints using retrieved evidence.",
+      "technologies": [
+        "Python",
+        "Streamlit",
+        "Sentence Transformers",
+        "FAISS",
+        "FLAN-T5-small"
+      ],
+      "implementation_details": [
+        "Processes a dataset of 80,667 complaint records.",
+        "Uses all-MiniLM-L6-v2 to generate 384-dimensional embeddings.",
+        "Uses FAISS IndexFlatL2 for similarity search.",
+        "Retrieves the top three results to provide context for answers.",
+        "Includes evidence validation and out-of-domain rejection."
+      ],
+      "demo_url": "https://creditrust-complaint-chatbot.streamlit.app/",
+      "github_url": "https://github.com/hawaebrahimhamid/rag-complaint-chatbot"
+    },
+    {
+      "id": "medical-telegram-warehouse",
+      "name": "Medical Telegram Warehouse",
+      "description": "A data engineering project that collects Telegram channel data, classifies images, and makes processed data available for search and reporting.",
+      "technologies": [
+        "Python",
+        "Telethon",
+        "YOLOv8",
+        "PostgreSQL",
+        "dbt",
+        "FastAPI",
+        "Dagster",
+        "Docker"
+      ],
+      "implementation_details": [
+        "Collects data using Telethon.",
+        "Classifies images into promotional, product-display, lifestyle, and other categories.",
+        "Uses PostgreSQL for data storage.",
+        "Uses dbt for data transformation.",
+        "Provides API-based search and reporting."
+      ],
+      "github_url": "https://github.com/hawaebrahimhamid/medical-telegram-warehouse"
+    },
+    {
+      "id": "brent-oil-change-point-dashboard",
+      "name": "Brent Oil Change Point Dashboard",
+      "description": "An interactive dashboard for exploring Brent oil prices and analyzing potential changes in price behavior.",
+      "technologies": ["React", "Vite", "Python", "Flask", "Pandas", "PyMC"],
+      "github_url": "https://github.com/hawaebrahimhamid/brent-oil-change-point-analysis",
+      "demo_url": "https://brent-oil-dashboard.vercel.app/"
+    }
+  ],
+  "current_portfolio_project": {
+    "name": "AI Portfolio",
+    "description": "A portfolio website and backend API being developed to demonstrate AI engineering and full-stack development skills.",
+    "frontend": ["Next.js", "TypeScript", "Tailwind CSS"],
+    "backend": ["Python", "FastAPI", "SQLAlchemy", "PostgreSQL"],
+    "completed_backend_features": [
+      "Health endpoint",
+      "Portfolio information endpoint",
+      "Validated contact form API",
+      "PostgreSQL contact-message storage",
+      "Automated backend tests"
+    ],
+    "planned_ai_features": [
+      "Portfolio knowledge base",
+      "Text embeddings",
+      "PostgreSQL vector search with pgvector",
+      "Retrieval-augmented generation",
+      "LLM-powered portfolio assistant"
+    ]
+  }
+}
