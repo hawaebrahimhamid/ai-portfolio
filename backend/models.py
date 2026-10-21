@@ -1,4 +1,5 @@
 
+from pgvector.sqlalchemy import Vector
 from datetime import datetime
 
 from sqlalchemy import DateTime, String, Text, func
@@ -35,3 +36,29 @@ class ContactMessage(Base):
         server_default=func.now(),
         nullable=False,
     )
+
+
+
+
+class PortfolioKnowledge(Base):
+    __tablename__ = "portfolio_knowledge"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+
+    chunk_id: Mapped[str] = mapped_column(
+        String(150),
+        unique=True,
+        nullable=False,
+    )
+
+    source: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+
+    text: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    embedding = mapped_column(Vector(384), nullable=False)
