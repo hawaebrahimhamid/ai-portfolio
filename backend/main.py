@@ -2,32 +2,38 @@
 import logging
 from datetime import datetime
 
+import models
+from database import SessionLocal
+from portfolio_assistant import answer_question
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+)
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from database import SessionLocal
-import models
 
-
-# Log unexpected errors in the backend terminal.
+# Configure logging for backend errors and diagnostics.
 logger = logging.getLogger(__name__)
 
 
 app = FastAPI(
     title="Hawa's Portfolio API",
     description=(
-        "Backend API for my AI Engineer "
-        "and Full-Stack Developer portfolio."
+        "Backend API for Hawa Ebrahim Hamid's "
+        "AI Engineer and Full-Stack Developer portfolio."
     ),
-    version="1.0.0",
+    version="1.1.0",
 )
 
 
-# Allow requests from the local development frontend.
-# Add your exact production website origin when deployed.
+# Allow requests from the local Next.js development website.
+# Add the exact production website origin when deployment is ready.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -48,6 +54,10 @@ def get_db():
     finally:
         db.close()
 
+
+# -------------------------
+# Contact form models
+# -------------------------
 
 class ContactMessageCreate(BaseModel):
     """Validate contact form submissions."""
@@ -77,7 +87,35 @@ class ContactMessageResponse(BaseModel):
     created_at: datetime
 
 
-@app.get("/health")
+# -------------------------
+# AI chat request/response models
+# -------------------------
+
+class ChatRequest(BaseModel):
+    """Validate a visitor's question for the AI assistant."""
+
+    question: str = Field(min_length=3, max_length=1000)
+
+    @field_validator("question", mode="before")
+    @classmethod
+    def strip_question(cls, value):
+        """Remove surrounding whitespace."""
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
+
+class ChatResponse(BaseModel):
+    """Define the response returned by the AI assistant."""
+
+    answer: str
+
+
+# -------------------------
+# Health endpoint
+# -------------------------
+
+@app.get("/health", tags=["Health"])
 def health_check():
     """Check whether the API is responding."""
     return {
@@ -86,7 +124,11 @@ def health_check():
     }
 
 
-@app.get("/api/about")
+# -------------------------
+# Portfolio information endpoint
+# -------------------------
+
+@app.get("/api/about", tags=["Portfolio"])
 def get_about():
     """Return basic portfolio information."""
     return {
@@ -102,10 +144,15 @@ def get_about():
     }
 
 
+# -------------------------
+# Contact form endpoint
+# -------------------------
+
 @app.post(
     "/api/contact",
     response_model=ContactMessageResponse,
     status_code=status.HTTP_201_CREATED,
+    tags=["Contact"],
 )
 def create_contact_message(
     contact: ContactMessageCreate,
@@ -113,8 +160,6 @@ def create_contact_message(
 ):
     """Validate and save a contact message to PostgreSQL."""
 
-    # Pydantic has already validated the field lengths, email,
-    # and trimmed the text fields.
     new_message = models.ContactMessage(
         name=contact.name,
         email=str(contact.email),
@@ -127,7 +172,7 @@ def create_contact_message(
         db.refresh(new_message)
 
         logger.info(
-            "Portfolio contact message saved successfully. Message ID: %s",
+            "Portfolio contact message saved. Message ID: %s",
             new_message.id,
         )
 
@@ -145,5 +190,51 @@ def create_contact_message(
             detail=(
                 "Unable to save your message right now. "
                 "Please try again."
+            ),
+        ) from None
+
+
+# -------------------------
+# AI portfolio chat endpoint
+# -------------------------
+
+@app.post(
+    "/api/chat",
+    response_model=ChatResponse,
+    tags=["AI Assistant"],
+)
+def chat_with_portfolio(request: ChatRequest):
+    """Answer a visitor's question using the portfolio RAG assistant."""
+
+    question = request.question.strip()
+
+    if not question:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Please enter a question.",
+        )
+
+    try:
+        answer = answer_question(question)
+
+        if not answer or not answer.strip():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The assistant could not generate an answer. Please try again.",
+            )
+
+        return ChatResponse(answer=answer.strip())
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        logger.exception("Unexpected error in the portfolio chat endpoint.")
+
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "The portfolio assistant is temporarily unavailable. "
+                "Please try again shortly."
             ),
         ) from None

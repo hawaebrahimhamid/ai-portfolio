@@ -62,11 +62,11 @@
         "FLAN-T5-small"
       ],
       "implementation_details": [
-        "Processes a dataset of 80,667 complaint records.",
-        "Uses all-MiniLM-L6-v2 to generate 384-dimensional embeddings.",
-        "Uses FAISS IndexFlatL2 for similarity search.",
-        "Retrieves the top three results to provide context for answers.",
-        "Includes evidence validation and out-of-domain rejection."
+        "Implements a custom retrieval-augmented generation (RAG) pipeline for evidence-based financial complaint analysis.",
+        "Generates 384-dimensional embeddings using all-MiniLM-L6-v2 and uses FAISS IndexFlatL2 for semantic similarity search.",
+        "Retrieves the top three relevant results to provide contextual evidence for answer generation.",
+        "Implements retrieval relevance filtering, answer-quality validation, and evidence-grounded fallback responses to improve reliability.",
+        "Handles out-of-domain questions and presents supporting complaint sources to improve transparency."
       ],
       "demo_url": "https://creditrust-complaint-chatbot.streamlit.app/",
       "github_url": "https://github.com/hawaebrahimhamid/rag-complaint-chatbot"
@@ -74,7 +74,7 @@
     {
       "id": "medical-telegram-warehouse",
       "name": "Medical Telegram Warehouse",
-      "description": "A data engineering project that collects Telegram channel data, classifies images, and makes processed data available for search and reporting.",
+      "description": "An end-to-end data engineering and computer vision pipeline that collects Telegram messages and images using Telethon, enriches images with YOLOv8 object detection and categorization, stores structured data in PostgreSQL, transforms raw data into analytical models with dbt, exposes search and reporting endpoints through FastAPI, and orchestrates the workflow with Dagster.",
       "technologies": [
         "Python",
         "Telethon",
@@ -86,11 +86,12 @@
         "Docker"
       ],
       "implementation_details": [
-        "Collects data using Telethon.",
-        "Classifies images into promotional, product-display, lifestyle, and other categories.",
-        "Uses PostgreSQL for data storage.",
-        "Uses dbt for data transformation.",
-        "Provides API-based search and reporting."
+        "Collects Telegram messages, metadata, and images from selected public channels using Telethon.",
+        "Uses YOLOv8 Nano for object detection and applies rule-based image categorization into promotional, product_display, lifestyle, and other categories.",
+        "Stores raw Telegram messages and image-detection results in structured PostgreSQL tables.",
+        "Uses dbt to transform raw data into staging and analytical models, including message and image-detection fact models.",
+        "Provides FastAPI REST endpoints for message search, channel activity, product reports, and visual-content statistics.",
+        "Uses Dagster to orchestrate the data ingestion, database loading, dbt transformations, and image-enrichment workflow."
       ],
       "github_url": "https://github.com/hawaebrahimhamid/medical-telegram-warehouse"
     },
@@ -99,6 +100,16 @@
       "name": "Brent Oil Change Point Dashboard",
       "description": "An interactive dashboard for exploring Brent oil prices and analyzing potential changes in price behavior.",
       "technologies": ["React", "Vite", "Python", "Flask", "Pandas", "PyMC"],
+
+      "implementation_details": [
+        "Performs data cleaning and exploratory analysis of historical Brent crude oil prices, including stationarity and volatility analysis.",
+        "Uses Bayesian change point analysis with PyMC to estimate shifts in the statistical behavior of oil price returns.",
+        "Visualizes price trends, estimated change points, historical event markers, KPI summaries, and date-filtered results in an interactive React and Vite dashboard.",
+        "Builds a Flask REST API with endpoints for historical prices, detected change points, historical events, and dashboard KPI statistics.",
+        "Connects the frontend to the backend through an environment-configured API URL and deploys the frontend on Vercel and the API on Render.",
+        "Interprets the Bayesian change-point results within the analyzed 1,000-observation subset, noting that computational constraints limited the number of posterior draws and the scope of the analysis."
+      ],
+
       "github_url": "https://github.com/hawaebrahimhamid/brent-oil-change-point-analysis",
       "demo_url": "https://brent-oil-dashboard.vercel.app/"
     }
