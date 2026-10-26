@@ -77,26 +77,29 @@ export default function PortfolioChat() {
       id="ai-assistant"
       className="border-t border-gray-200 py-20 dark:border-slate-800 sm:py-24"
     >
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-10 max-w-2xl text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 dark:border-slate-700 dark:text-slate-300">
-            <Sparkles size={16} />
-            AI-powered portfolio assistant
-          </div>
+      {/* Container width matched with other standard sections */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header - Aligned cleanly to match the rest of the site */}
+        <div className="mb-10 max-w-3xl text-left">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            PORTFOLIO AI ASSISTANT
+          </p>
 
-          <h2 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-            Ask About My Work
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+            Ask About{" "}
+            <span className="text-blue-600 dark:text-blue-400">My Work.</span>
           </h2>
 
-          <p className="mt-4 leading-7 text-gray-600 dark:text-slate-300">
+          <p className="mt-4 text-base leading-7 text-gray-600 dark:text-slate-300">
             Curious about my projects, technical skills, or experience? Ask a
             question and explore my portfolio with the help of AI.
           </p>
         </div>
 
+        {/* Chat UI Container - Full width consistency */}
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
           <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-4 dark:border-slate-800">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-900 text-white dark:bg-white dark:text-gray-900">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white dark:bg-blue-500">
               <Bot size={21} />
             </div>
             <div>
@@ -156,7 +159,7 @@ export default function PortfolioChat() {
                 <div
                   className={`max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-6 ${
                     message.role === "user"
-                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                      ? "bg-blue-600 text-white dark:bg-blue-600 dark:text-white"
                       : "bg-gray-100 text-gray-800 dark:bg-slate-900 dark:text-slate-200"
                   }`}
                 >
@@ -214,7 +217,10 @@ export default function PortfolioChat() {
 
             {isLoading && (
               <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-slate-400">
-                <LoaderCircle size={18} className="animate-spin" />
+                <LoaderCircle
+                  size={18}
+                  className="animate-spin text-blue-600 dark:text-blue-400"
+                />
                 Searching the portfolio and preparing an answer...
               </div>
             )}
@@ -237,7 +243,7 @@ export default function PortfolioChat() {
               Ask a question about the portfolio
             </label>
 
-            <div className="flex items-center gap-2 rounded-xl border border-gray-200 p-2 focus-within:ring-2 focus-within:ring-gray-400 dark:border-slate-700 dark:focus-within:ring-slate-500">
+            <div className="flex items-center gap-2 rounded-xl border border-gray-200 p-2 focus-within:ring-2 focus-within:ring-blue-500 dark:border-slate-700 dark:focus-within:ring-blue-500">
               <input
                 id="portfolio-question"
                 value={question}
@@ -252,7 +258,7 @@ export default function PortfolioChat() {
                 type="submit"
                 disabled={isLoading || question.trim().length < 3}
                 aria-label="Send question"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-gray-900"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-blue-600 dark:text-white"
               >
                 {isLoading ? (
                   <LoaderCircle size={18} className="animate-spin" />
