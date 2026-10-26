@@ -9,7 +9,25 @@
       "Python backend development",
       "Data engineering and machine learning"
     ],
-    "experience_summary": "Hawa demonstrates her software development skills through independent projects and technical training in AI, machine learning, data engineering, and full-stack development. This portfolio does not establish several years of professional software engineering employment or provide verified employment dates. Do not infer employment history that is not documented."
+    "experience_summary": "Hawa demonstrates her software development skills through independent projects and technical training in AI, machine learning, data engineering, and full-stack development. This portfolio does not establish several years of professional software engineering employment or provide verified employment dates. Do not infer employment history that is not documented.",
+    "certifications": [
+      {
+        "name": "Kifiya AI Mastery Training Program",
+        "provider": "10 Academy and Kifiya Financial Technology",
+        "achievement": "Completed with distinction",
+        "issued": "August 2026",
+        "type": "Training program completion certificate",
+        "certificate_path": "/certificates/kifiya-ai-mastery.pdf",
+        "topics": [
+          "AI and Machine Learning",
+          "Machine Learning Engineering",
+          "Data Engineering",
+          "Retrieval-Augmented Generation (RAG) Systems",
+          "Data Warehousing",
+          "Financial Analysis"
+        ]
+      }
+    ]
   },
   "skills": [
     {
@@ -101,7 +119,6 @@
       "name": "Brent Oil Change Point Dashboard",
       "description": "An interactive dashboard for exploring Brent oil prices and analyzing potential changes in price behavior.",
       "technologies": ["React", "Vite", "Python", "Flask", "Pandas", "PyMC"],
-
       "implementation_details": [
         "Performs data cleaning and exploratory analysis of historical Brent crude oil prices, including stationarity and volatility analysis.",
         "Uses Bayesian change point analysis with PyMC to estimate shifts in the statistical behavior of oil price returns.",
@@ -110,7 +127,6 @@
         "Connects the frontend to the backend through an environment-configured API URL and deploys the frontend on Vercel and the API on Render.",
         "Interprets the Bayesian change-point results within the analyzed 1,000-observation subset, noting that computational constraints limited the number of posterior draws and the scope of the analysis."
       ],
-
       "github_url": "https://github.com/hawaebrahimhamid/brent-oil-change-point-analysis",
       "demo_url": "https://brent-oil-dashboard.vercel.app/"
     }

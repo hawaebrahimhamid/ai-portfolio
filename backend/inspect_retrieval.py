@@ -6,11 +6,7 @@ from database import SessionLocal
 from models import PortfolioKnowledge
 
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-QUESTION = (
-    "Does Hawa have several years of professional software engineering "
-    "experience, or is her experience primarily based on projects and "
-    "technical training?"
-)
+QUESTION = "What training programs or certificates has Hawa completed, and what distinction did she receive?"
 TOP_K = 10
 
 

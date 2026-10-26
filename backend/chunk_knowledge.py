@@ -18,6 +18,38 @@ def chunk_knowledge():
 
     owner = data["portfolio_owner"]
 
+    # Include certificate and training-program information.
+    certification_text = ""
+    certifications = owner.get("certifications", [])
+
+    if certifications:
+        certification_details = []
+
+        for cert in certifications:
+            details = (
+                f"{cert['name']}. "
+                f"Provider: {cert['provider']}. "
+                f"Achievement: {cert['achievement']}. "
+                f"Issued: {cert['issued']}. "
+                f"Type: {cert['type']}."
+            )
+
+            topics = cert.get("topics", [])
+            if topics:
+                details += " Topics covered: " + ", ".join(topics) + "."
+
+            certificate_path = cert.get("certificate_path")
+            if certificate_path:
+                details += f" Certificate file: {certificate_path}."
+
+            certification_details.append(details)
+
+        certification_text = (
+            " Training programs and certificates: "
+            + " ".join(certification_details)
+        )
+
+    # Owner profile now includes experience and certifications.
     chunks.append({
         "chunk_id": "owner-profile",
         "source": "portfolio_owner",
@@ -27,9 +59,11 @@ def chunk_knowledge():
             + ", ".join(owner["professional_focus"])
             + ". "
             + owner["experience_summary"]
+            + certification_text
         ),
     })
 
+    # Skills
     for index, skill_group in enumerate(data["skills"]):
         chunks.append({
             "chunk_id": f"skills-{index + 1}",
@@ -43,6 +77,7 @@ def chunk_knowledge():
             ),
         })
 
+    # Projects
     for project in data["projects"]:
         project_text = (
             f"Project: {project['name']}. "
@@ -69,6 +104,7 @@ def chunk_knowledge():
                 "text": f"Project: {project['name']}. {detail}",
             })
 
+    # Current portfolio project
     portfolio_project = data["current_portfolio_project"]
 
     chunks.append({
