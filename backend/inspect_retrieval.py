@@ -6,7 +6,11 @@ from database import SessionLocal
 from models import PortfolioKnowledge
 
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-QUESTION = "What AI and full-stack projects has Hawa built?"
+QUESTION = (
+    "Does Hawa have several years of professional software engineering "
+    "experience, or is her experience primarily based on projects and "
+    "technical training?"
+)
 TOP_K = 10
 
 
@@ -25,7 +29,6 @@ def main():
 
         statement = (
             select(PortfolioKnowledge, distance.label("distance"))
-            .where(PortfolioKnowledge.source == "project")
             .order_by(distance)
             .limit(TOP_K)
         )

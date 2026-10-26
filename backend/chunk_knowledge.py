@@ -25,7 +25,8 @@ def chunk_knowledge():
             f"{owner['name']} is a {owner['role']} based in "
             f"{owner['location']}. Professional focus areas: "
             + ", ".join(owner["professional_focus"])
-            + "."
+            + ". "
+            + owner["experience_summary"]
         ),
     })
 
