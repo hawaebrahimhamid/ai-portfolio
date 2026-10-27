@@ -53,7 +53,6 @@ def test_career_question_uses_documented_background(assistant, monkeypatch):
     generator.assert_not_called()
 
 
-
 def test_no_retrieved_evidence_does_not_call_gemini(assistant, monkeypatch):
     """Return the safe fallback when retrieval finds no evidence."""
 
@@ -106,3 +105,113 @@ def test_project_question_uses_retrieved_evidence(assistant, monkeypatch):
     prompt = generator.call_args.args[0]
     assert evidence in prompt
     assert "Do not invent employment history" in prompt
+
+
+def test_generate_with_retry_retries_temporary_failure(
+    assistant, monkeypatch
+):
+    """Retry a temporary Gemini error and return the successful response."""
+
+    response = SimpleNamespace(text="Successful Gemini response")
+
+    assistant.client.models.generate_content.side_effect = [
+        RuntimeError("503 service unavailable"),
+        response,
+    ]
+    sleep_mock = Mock()
+    monkeypatch.setattr(assistant.time, "sleep", sleep_mock)
+
+    result = assistant.generate_with_retry("Test prompt")
+
+    assert result is response
+    assert assistant.client.models.generate_content.call_count == 2
+    sleep_mock.assert_called_once_with(2)
+
+
+def test_generate_with_retry_stops_after_max_attempts(
+    assistant, monkeypatch
+):
+    """Stop retrying after the configured number of attempts."""
+
+    assistant.client.models.generate_content.side_effect = (
+        RuntimeError("503 service unavailable")
+    )
+    sleep_mock = Mock()
+    monkeypatch.setattr(assistant.time, "sleep", sleep_mock)
+
+    with pytest.raises(RuntimeError, match="503 service unavailable"):
+        assistant.generate_with_retry("Test prompt", max_attempts=3)
+
+    assert assistant.client.models.generate_content.call_count == 3
+    assert [call.args[0] for call in sleep_mock.call_args_list] == [2, 4]
+
+def test_generate_with_retry_does_not_retry_non_retryable_error(
+    assistant, monkeypatch
+):
+    """Raise non-retryable errors immediately."""
+
+    assistant.client.models.generate_content.side_effect = (
+        ValueError("Invalid request")
+    )
+    sleep_mock = Mock()
+    monkeypatch.setattr(assistant.time, "sleep", sleep_mock)
+
+    with pytest.raises(ValueError, match="Invalid request"):
+        assistant.generate_with_retry("Test prompt")
+
+    assistant.client.models.generate_content.assert_called_once()
+    sleep_mock.assert_not_called()
+
+def test_empty_gemini_response_returns_safe_fallback(
+    assistant, monkeypatch
+):
+    """Return a helpful fallback when Gemini returns no answer."""
+
+    monkeypatch.setattr(
+        assistant,
+        "retrieve_knowledge",
+        lambda question: [
+            "CrediTrust is a RAG-based complaint assistant."
+        ],
+    )
+
+    generator = Mock(
+        return_value=SimpleNamespace(
+            candidates=[],
+            text="",
+        )
+    )
+    monkeypatch.setattr(assistant, "generate_with_retry", generator)
+
+    answer = assistant.answer_question(
+        "What does the CrediTrust project do?"
+    )
+
+    assert answer == (
+        "Sorry, I couldn't generate an answer just now. "
+        "Please try asking in a different way."
+    )
+    generator.assert_called_once()
+
+
+
+def test_retrieval_error_returns_safe_fallback(assistant, monkeypatch):
+    """Handle database or knowledge-retrieval errors safely."""
+
+    def raise_database_error(question):
+        raise RuntimeError("Simulated database connection failure")
+
+    monkeypatch.setattr(
+        assistant,
+        "retrieve_knowledge",
+        raise_database_error,
+    )
+
+    answer = assistant.answer_question(
+        "What does the CrediTrust project do?"
+    )
+
+    assert answer == (
+        "Sorry, the portfolio assistant is temporarily unavailable. "
+        "Please try again shortly."
+    )
