@@ -198,3 +198,99 @@ def test_database_error_returns_500_and_rolls_back():
 
     finally:
         main.app.dependency_overrides.clear()
+
+# -------------------------
+# AI chat endpoint tests
+# -------------------------
+
+def test_chat_endpoint_returns_answer(client, monkeypatch):
+    """Return an answer when the assistant succeeds."""
+
+    def fake_answer_question(question):
+        assert question == "What is the CrediTrust project?"
+        return "CrediTrust is a RAG-based complaint assistant."
+
+    monkeypatch.setattr(
+        main,
+        "answer_question",
+        fake_answer_question,
+    )
+
+    response = client.post(
+        "/api/chat",
+        json={"question": "What is the CrediTrust project?"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["answer"] == (
+        "CrediTrust is a RAG-based complaint assistant."
+    )
+
+
+def test_chat_endpoint_rejects_whitespace_question(client):
+    """Reject a question containing only whitespace."""
+
+    response = client.post(
+        "/api/chat",
+        json={"question": "   "},
+    )
+
+    assert response.status_code == 422
+
+
+def test_chat_endpoint_rejects_overlong_question(client):
+    """Reject questions longer than the configured limit."""
+
+    response = client.post(
+        "/api/chat",
+        json={"question": "a" * 1001},
+    )
+
+    assert response.status_code == 422
+
+
+def test_chat_endpoint_returns_503_on_unexpected_error(
+    client,
+    monkeypatch,
+):
+    """Return a safe error response if the assistant raises."""
+
+    def fake_answer_question(question):
+        raise RuntimeError("Simulated assistant failure")
+
+    monkeypatch.setattr(
+        main,
+        "answer_question",
+        fake_answer_question,
+    )
+
+    response = client.post(
+        "/api/chat",
+        json={"question": "What is the CrediTrust project?"},
+    )
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == (
+        "The portfolio assistant is temporarily unavailable. "
+        "Please try again shortly."
+    )
+
+
+def test_chat_endpoint_rejects_empty_assistant_answer(
+    client,
+    monkeypatch,
+):
+    """Return a service error if the assistant returns no answer."""
+
+    monkeypatch.setattr(
+        main,
+        "answer_question",
+        lambda question: "",
+    )
+
+    response = client.post(
+        "/api/chat",
+        json={"question": "What is the CrediTrust project?"},
+    )
+
+    assert response.status_code == 503
