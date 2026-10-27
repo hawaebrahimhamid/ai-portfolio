@@ -294,3 +294,27 @@ def test_chat_endpoint_rejects_empty_assistant_answer(
     )
 
     assert response.status_code == 503
+
+# -------------------------
+# Request observability tests
+# -------------------------
+
+def test_request_includes_request_id(client):
+    """Every response should include a request ID."""
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.headers.get("X-Request-ID")
+
+
+def test_each_request_gets_a_unique_request_id(client):
+    """Different requests should receive different request IDs."""
+    first_response = client.get("/health")
+    second_response = client.get("/health")
+
+    first_request_id = first_response.headers.get("X-Request-ID")
+    second_request_id = second_response.headers.get("X-Request-ID")
+
+    assert first_request_id
+    assert second_request_id
+    assert first_request_id != second_request_id

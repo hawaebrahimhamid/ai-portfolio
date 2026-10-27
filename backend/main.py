@@ -1,12 +1,14 @@
 
 import logging
+import time
+import uuid
 from datetime import datetime
 
 import models
 from database import SessionLocal
-from portfolio_assistant import answer_question
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from portfolio_assistant import answer_question
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -18,9 +20,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 
-# Configure logging for backend errors and diagnostics.
+# Configure backend logging.
 logger = logging.getLogger(__name__)
-
 
 app = FastAPI(
     title="Hawa's Portfolio API",
@@ -33,7 +34,7 @@ app = FastAPI(
 
 
 # Allow requests from the local Next.js development website.
-# Add the exact production website origin when deployment is ready.
+# Add your exact production website origin when deployment is ready.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -43,8 +44,62 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
+    expose_headers=["X-Request-ID"],
 )
 
+
+# -------------------------
+# Request observability
+# -------------------------
+
+@app.middleware("http")
+async def observe_requests(request: Request, call_next):
+    """Track request IDs, processing time, and HTTP outcomes."""
+    request_id = str(uuid.uuid4())
+    start_time = time.perf_counter()
+
+    try:
+        response = await call_next(request)
+        duration_ms = round(
+            (time.perf_counter() - start_time) * 1000, 2
+        )
+
+        response.headers["X-Request-ID"] = request_id
+
+        logger.info(
+            "request_completed request_id=%s method=%s path=%s "
+            "status_code=%s duration_ms=%s",
+            request_id,
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration_ms,
+        )
+
+        return response
+
+    except Exception as exc:
+        duration_ms = round(
+            (time.perf_counter() - start_time) * 1000, 2
+        )
+
+        # Log the exception type, not its message or request contents.
+        logger.error(
+            "request_failed request_id=%s method=%s path=%s "
+            "error_type=%s duration_ms=%s",
+            request_id,
+            request.method,
+            request.url.path,
+            type(exc).__name__,
+            duration_ms,
+        )
+
+        raise
+
+
+# -------------------------
+# Database dependency
+# -------------------------
 
 def get_db():
     """Provide a database session for each request."""
@@ -171,18 +226,22 @@ def create_contact_message(
         db.commit()
         db.refresh(new_message)
 
+        # Do not log the contact's name, email, or message.
         logger.info(
-            "Portfolio contact message saved. Message ID: %s",
+            "contact_message_saved message_id=%s",
             new_message.id,
         )
 
         return new_message
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as exc:
         db.rollback()
 
-        logger.exception(
-            "Database error while saving a portfolio contact message."
+        # Avoid logging database exception details that might
+        # contain SQL statements or submitted data.
+        logger.error(
+            "contact_message_save_failed error_type=%s",
+            type(exc).__name__,
         )
 
         raise HTTPException(
@@ -220,7 +279,10 @@ def chat_with_portfolio(request: ChatRequest):
         if not answer or not answer.strip():
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="The assistant could not generate an answer. Please try again.",
+                detail=(
+                    "The assistant could not generate an answer. "
+                    "Please try again."
+                ),
             )
 
         return ChatResponse(answer=answer.strip())
@@ -228,8 +290,12 @@ def chat_with_portfolio(request: ChatRequest):
     except HTTPException:
         raise
 
-    except Exception:
-        logger.exception("Unexpected error in the portfolio chat endpoint.")
+    except Exception as exc:
+        # Do not log the question, answer, or exception message.
+        logger.error(
+            "portfolio_chat_failed error_type=%s",
+            type(exc).__name__,
+        )
 
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
