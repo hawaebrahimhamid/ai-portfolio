@@ -75,6 +75,53 @@ def test_health_endpoint(client):
     assert response.json()["status"] == "healthy"
 
 
+def test_readiness_endpoint_when_database_is_available(client, monkeypatch):
+    """Report ready when the database query succeeds."""
+
+    class FakeConnection:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            return False
+
+        def execute(self, query):
+            assert str(query) == "SELECT 1"
+            return None
+
+    monkeypatch.setattr(
+        main.engine,
+        "connect",
+        lambda: FakeConnection(),
+    )
+
+    response = client.get("/ready")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+
+
+def test_readiness_endpoint_when_database_fails(client, monkeypatch):
+    """Return 503 when the database cannot be reached."""
+
+    def fail_to_connect():
+        raise SQLAlchemyError("Simulated database failure")
+
+    monkeypatch.setattr(
+        main.engine,
+        "connect",
+        fail_to_connect,
+    )
+
+    response = client.get("/ready")
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == (
+        "The database is temporarily unavailable."
+    )
+
+
+
 def test_about_endpoint(client):
     response = client.get("/api/about")
 

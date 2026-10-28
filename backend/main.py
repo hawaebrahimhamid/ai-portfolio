@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 
 import models
-from database import SessionLocal
+from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from portfolio_assistant import answer_question
@@ -16,9 +16,9 @@ from pydantic import (
     Field,
     field_validator,
 )
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-
 
 # Configure backend logging.
 logger = logging.getLogger(__name__)
@@ -166,17 +166,36 @@ class ChatResponse(BaseModel):
     answer: str
 
 
+
 # -------------------------
-# Health endpoint
+# Health and readiness endpoints
 # -------------------------
 
 @app.get("/health", tags=["Health"])
 def health_check():
-    """Check whether the API is responding."""
+    """Check whether the API process is responding."""
     return {
         "status": "healthy",
         "message": "Portfolio API is running successfully.",
     }
+
+
+@app.get("/ready", tags=["Health"])
+def readiness_check():
+    """Check whether the API can reach its database."""
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+
+        return {"status": "ready"}
+
+    except SQLAlchemyError:
+        logger.warning("database_readiness_check_failed")
+
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The database is temporarily unavailable.",
+        ) from None
 
 
 # -------------------------
