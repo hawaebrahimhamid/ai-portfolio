@@ -3,6 +3,7 @@ import logging
 import os
 import time
 
+from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
 from sentence_transformers import SentenceTransformer
@@ -12,7 +13,9 @@ from database import SessionLocal
 from models import PortfolioKnowledge
 
 
-load_dotenv()
+load_dotenv(
+    dotenv_path=Path(__file__).resolve().parent / ".env"
+)
 
 logger = logging.getLogger(__name__)
 
