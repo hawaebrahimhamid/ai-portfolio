@@ -365,3 +365,67 @@ def test_each_request_gets_a_unique_request_id(client):
     assert first_request_id
     assert second_request_id
     assert first_request_id != second_request_id
+
+def test_request_body_limit_rejects_oversized_request(client):
+    """Reject request bodies larger than 16 KiB with HTTP 413."""
+
+    oversized_body = b"x" * (16 * 1024 + 1)
+
+    response = client.post(
+        "/api/chat",
+        content=oversized_body,
+        headers={"Content-Type": "application/json"},
+    )
+
+    assert response.status_code == 413
+
+
+def test_contact_rate_limit_returns_429(client):
+    """Reject contact submissions after five requests per minute."""
+
+    main.limiter._storage.reset()
+
+    payload = {
+        "name": "Test Visitor",
+        "email": "visitor@example.com",
+        "message": "Testing the contact endpoint rate limit.",
+    }
+
+    responses = [
+        client.post("/api/contact", json=payload)
+        for _ in range(6)
+    ]
+
+    assert all(
+        response.status_code == 201
+        for response in responses[:5]
+    )
+    assert responses[5].status_code == 429
+
+
+def test_chat_rate_limit_returns_429(client, monkeypatch):
+    """Reject chat requests after ten requests per minute."""
+
+    main.limiter._storage.reset()
+
+    # Mock the AI assistant so the test doesn't call a real AI service.
+    monkeypatch.setattr(
+        main,
+        "answer_question",
+        lambda question: "This is a test answer.",
+    )
+
+    payload = {
+        "question": "What projects have I built?"
+    }
+
+    responses = [
+        client.post("/api/chat", json=payload)
+        for _ in range(11)
+    ]
+
+    assert all(
+        response.status_code == 200
+        for response in responses[:10]
+    )
+    assert responses[10].status_code == 429

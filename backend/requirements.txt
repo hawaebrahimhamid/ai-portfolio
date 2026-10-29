@@ -6,3 +6,4 @@ email-validator
 pgvector
 google-genai
 sentence-transformers
+slowapi==0.1.10

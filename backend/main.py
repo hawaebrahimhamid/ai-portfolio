@@ -5,7 +5,11 @@ import uuid
 from datetime import datetime
 
 import models
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from database import SessionLocal, engine
+from starlette.middleware.body_limit import RequestBodyLimitMiddleware
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from portfolio_assistant import answer_question
@@ -32,6 +36,20 @@ app = FastAPI(
     version="1.1.0",
 )
 
+# Configure API rate limiting.
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler,
+)
+
+
+# Limit incoming HTTP request bodies to 16 KiB.
+app.add_middleware(
+    RequestBodyLimitMiddleware,
+    max_body_size=16 * 1024,
+)
 
 # Allow requests from the local Next.js development website.
 # Add your exact production website origin when deployment is ready.
@@ -222,16 +240,20 @@ def get_about():
 # Contact form endpoint
 # -------------------------
 
+
 @app.post(
     "/api/contact",
     response_model=ContactMessageResponse,
     status_code=status.HTTP_201_CREATED,
     tags=["Contact"],
 )
+@limiter.limit("5/minute")
 def create_contact_message(
+    request: Request,
     contact: ContactMessageCreate,
     db: Session = Depends(get_db),
 ):
+
     """Validate and save a contact message to PostgreSQL."""
 
     new_message = models.ContactMessage(
@@ -276,15 +298,21 @@ def create_contact_message(
 # AI portfolio chat endpoint
 # -------------------------
 
+
 @app.post(
     "/api/chat",
     response_model=ChatResponse,
     tags=["AI Assistant"],
 )
-def chat_with_portfolio(request: ChatRequest):
+@limiter.limit("10/minute")
+def chat_with_portfolio(
+    request: Request,
+    chat_request: ChatRequest,
+):
     """Answer a visitor's question using the portfolio RAG assistant."""
 
-    question = request.question.strip()
+    question = chat_request.question.strip()
+
 
     if not question:
         raise HTTPException(
