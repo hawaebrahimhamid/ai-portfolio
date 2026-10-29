@@ -296,11 +296,12 @@ def test_chat_endpoint_rejects_overlong_question(client):
     assert response.status_code == 422
 
 
+
 def test_chat_endpoint_returns_503_on_unexpected_error(
     client,
     monkeypatch,
 ):
-    """Return a safe error response if the assistant raises."""
+    """Return a safe error without exposing internal exception details."""
 
     def fake_answer_question(question):
         raise RuntimeError("Simulated assistant failure")
@@ -321,13 +322,15 @@ def test_chat_endpoint_returns_503_on_unexpected_error(
         "The portfolio assistant is temporarily unavailable. "
         "Please try again shortly."
     )
+    assert "Simulated assistant failure" not in response.text
+
 
 
 def test_chat_endpoint_rejects_empty_assistant_answer(
     client,
     monkeypatch,
 ):
-    """Return a service error if the assistant returns no answer."""
+    """Return a safe service error when the assistant returns no answer."""
 
     monkeypatch.setattr(
         main,
@@ -341,7 +344,9 @@ def test_chat_endpoint_rejects_empty_assistant_answer(
     )
 
     assert response.status_code == 503
-
+    assert response.json()["detail"] == (
+        "The assistant could not generate an answer. Please try again."
+    )
 # -------------------------
 # Request observability tests
 # -------------------------
