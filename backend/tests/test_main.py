@@ -119,7 +119,7 @@ def test_readiness_endpoint_when_database_fails(client, monkeypatch):
     assert response.json()["detail"] == (
         "The database is temporarily unavailable."
     )
-
+    assert response.headers.get("X-Request-ID")
 
 
 def test_about_endpoint(client):
@@ -323,7 +323,7 @@ def test_chat_endpoint_returns_503_on_unexpected_error(
         "Please try again shortly."
     )
     assert "Simulated assistant failure" not in response.text
-
+    assert response.headers.get("X-Request-ID")
 
 
 def test_chat_endpoint_rejects_empty_assistant_answer(
