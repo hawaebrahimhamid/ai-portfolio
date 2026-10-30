@@ -177,7 +177,7 @@ With the backend Python environment activated, run this from the repository root
 python -m pytest -q
 ```
 
-The backend test suite most recently passed **32 tests** during development. Test results may change as the code evolves.
+The backend test suite most recently passed **35 tests** during development. Test results may change as the code evolves.
 
 ## Repository Structure
 
