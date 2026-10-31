@@ -34,6 +34,7 @@ I'm looking for opportunities where I can contribute through practical project w
 An AI-powered application that retrieves relevant consumer financial complaint information to help answer questions with supporting evidence.
 
 **Key contributions**
+
 - Processed and prepared complaint text for retrieval.
 - Generated embeddings using Sentence Transformers and implemented FAISS vector search.
 - Built a retrieval and answer-generation pipeline using FLAN-T5.
@@ -47,6 +48,7 @@ An AI-powered application that retrieves relevant consumer financial complaint i
 A data pipeline that ingests Telegram data, categorizes product images, and stores structured information for downstream analysis.
 
 **Key contributions**
+
 - Implemented Telegram data ingestion using Telethon.
 - Applied YOLOv8 for image categorization.
 - Used PostgreSQL for data storage and dbt for transformations.
@@ -60,6 +62,7 @@ A data pipeline that ingests Telegram data, categorizes product images, and stor
 An interactive dashboard for exploring historical Brent crude oil prices, potential structural changes, and related events.
 
 **Key contributions**
+
 - Prepared and analyzed time-series data using Python and Pandas.
 - Applied Bayesian change-point analysis with PyMC.
 - Developed a Flask REST API.
@@ -73,6 +76,7 @@ An interactive dashboard for exploring historical Brent crude oil prices, potent
 This repository contains my portfolio website and an associated backend development project. It serves both as a professional showcase and as a practical way to strengthen my full-stack engineering skills.
 
 **Technology stack**
+
 - Next.js, React, TypeScript, and Tailwind CSS
 - Python and FastAPI
 - PostgreSQL and SQLAlchemy
@@ -128,6 +132,12 @@ npm run lint
 npm run build
 ```
 
+To run the optimized production build locally, after building, run:
+
+```bash
+npm run start
+```
+
 ### 3. Configure and run the backend
 
 In Windows PowerShell, from the repository root, create a local environment file:
@@ -144,6 +154,14 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 Replace the placeholders with your actual local configuration. Create the PostgreSQL database before initializing the tables.
+
+Enable the pgvector extension in that database before initializing the tables. For a local PostgreSQL installation, replace `DATABASE` with your database name and run:
+
+```bash
+psql -U postgres -d DATABASE -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
+
+Your PostgreSQL server must have the pgvector extension installed and available.
 
 Create a Python virtual environment and install the backend dependencies:
 
