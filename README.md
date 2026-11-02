@@ -1,113 +1,160 @@
 # AI Engineer & Full-Stack Developer Portfolio
 
-**Live Portfolio:** Add deployed website URL here after deployment.
+**Live Portfolio:** Coming soon — deployment pending.
 
-Building practical AI-powered applications and full-stack software through hands-on projects, technical training, and continuous engineering practice.
+A professional portfolio showcasing my hands-on work in applied AI, full-stack web development, data engineering, and software engineering.
 
-This portfolio showcases my work in applied AI, retrieval-augmented generation (RAG), data engineering, backend development, and modern web applications.
+I build practical applications that combine AI capabilities, backend systems, databases, and modern web technologies. My work is based on independent projects, technical training, and continuous engineering practice.
 
 **Explore:** [GitHub](https://github.com/hawaebrahimhamid) · [LinkedIn](https://linkedin.com/in/hawa-ebrahim-hamid) · [Email](mailto:hawaebrahimhamid@gmail.com)
+
+---
 
 ## About Me
 
 I'm Hawa Ebrahim Hamid, an aspiring AI Engineer and Full-Stack Developer based in Addis Ababa, Ethiopia.
 
-My academic background is in Geology, and I have since focused my learning on software engineering and applied AI. Through the Kifiya AI Mastery Training Program, which I completed with distinction, independent projects, and continuous technical practice, I've developed hands-on experience with Python, machine learning, RAG systems, REST APIs, databases, and full-stack web development.
+I have an academic background in Geology and have focused my technical development on software engineering, machine learning, and applied AI.
 
-I learn by building: translating technical concepts into working applications, testing functionality, investigating problems, and improving reliability. My projects include an evidence-based financial complaint assistant, a data engineering and computer vision pipeline, and an interactive oil-price analysis dashboard.
+I completed the **Kifiya AI Mastery Training Program with distinction**, where I developed knowledge and practical skills in machine learning engineering, data engineering, RAG systems, data warehousing, and financial analysis.
 
-I'm looking for opportunities where I can contribute through practical project work, learn from experienced engineers, and continue developing my skills in AI engineering and full-stack development.
+Through independent projects and technical training, I have gained hands-on experience building:
+
+- AI-powered applications and retrieval-augmented generation (RAG) systems.
+- REST APIs and backend services.
+- Full-stack web applications.
+- Database-backed systems and data pipelines.
+- Machine learning and computer vision applications.
+
+I approach engineering through practical implementation: building, testing, debugging, evaluating, and improving working software.
+
+I'm interested in opportunities in AI engineering, backend development, and full-stack software development where I can contribute through project-based experience and continue growing as an engineer.
 
 ## Technical Skills
 
-- **Programming:** Python, JavaScript, SQL
-- **Frontend:** React, Next.js, TypeScript, HTML, CSS, Tailwind CSS
-- **Backend:** FastAPI, Flask, Node.js, Express, REST APIs
-- **AI and Machine Learning:** RAG, LLMs, embeddings, Sentence Transformers, FAISS, prompt engineering, YOLOv8
-- **Data Engineering and Analysis:** PostgreSQL, Pandas, NumPy, PyMC, ETL, data pipelines
-- **Engineering Practices:** Git, GitHub, Docker, pytest, automated testing, CI/CD fundamentals
+| Area                           | Technologies and Tools                                                                   |
+| ------------------------------ | ---------------------------------------------------------------------------------------- |
+| Programming                    | Python, JavaScript, TypeScript, SQL                                                      |
+| Frontend                       | React, Next.js, HTML, CSS, Tailwind CSS                                                  |
+| Backend                        | FastAPI, Flask, Node.js, Express, REST APIs                                              |
+| AI and Machine Learning        | RAG, LLMs, embeddings, Sentence Transformers, FAISS, FLAN-T5, prompt engineering, YOLOv8 |
+| Databases and Data Engineering | PostgreSQL, MySQL, Firestore, pgvector, Pandas, NumPy, dbt, ETL                          |
+| Data Analysis                  | PyMC, time-series analysis, Bayesian change-point analysis                               |
+| Development and Testing        | Git, GitHub, Docker, pytest, automated testing, GitHub Actions, CI/CD fundamentals       |
 
 ## Featured Projects
 
-### 1. CrediTrust Complaint Assistant — RAG Application
+### 1. CrediTrust Complaint Assistant — Retrieval-Augmented Generation (RAG)
 
-An AI-powered application that retrieves relevant consumer financial complaint information to help answer questions with supporting evidence.
+**Live Demo:** [Open Application](https://creditrust-complaint-chatbot.streamlit.app/) · **GitHub:** [View Repository](https://github.com/hawaebrahimhamid/rag-complaint-chatbot)
+An AI-powered complaint assistant that retrieves relevant consumer financial complaint information and generates evidence-based answers.
 
-**Key contributions**
+**Key contributions:**
 
-- Processed and prepared complaint text for retrieval.
-- Generated embeddings using Sentence Transformers and implemented FAISS vector search.
-- Built a retrieval and answer-generation pipeline using FLAN-T5.
-- Added source attribution, response validation, and handling of unsupported questions.
-- Developed automated tests and improved application reliability.
+- Processed and prepared more than 80,000 consumer complaint records for retrieval.
+- Generated 384-dimensional embeddings using Sentence Transformers.
+- Implemented semantic similarity search using FAISS.
+- Integrated FLAN-T5-small for answer generation.
+- Retrieved relevant supporting complaint information for responses.
+- Implemented out-of-domain question handling and response validation.
+- Added automated tests to evaluate application behavior.
 
-**Links:** [Live Demo](https://creditrust-complaint-chatbot.streamlit.app/) · [GitHub Repository](https://github.com/hawaebrahimhamid/rag-complaint-chatbot)
+**Technologies:** Python, Streamlit, Sentence Transformers, FAISS, FLAN-T5, Pandas, pytest.
 
 ### 2. Medical Telegram Data Warehouse — Data Engineering and Computer Vision
 
-A data pipeline that ingests Telegram data, categorizes product images, and stores structured information for downstream analysis.
+**GitHub:** [View Repository](https://github.com/hawaebrahimhamid/medical-telegram-warehouse)
 
-**Key contributions**
+An end-to-end data engineering project that collects Telegram channel information, processes visual content, and organizes structured data for analysis.
+
+**Key contributions:**
 
 - Implemented Telegram data ingestion using Telethon.
-- Applied YOLOv8 for image categorization.
-- Used PostgreSQL for data storage and dbt for transformations.
-- Developed analytical API endpoints with FastAPI.
-- Worked with Dagster orchestration and Docker-based development.
+- Applied YOLOv8 to categorize images into content categories.
+- Stored structured information in PostgreSQL.
+- Used dbt for data transformations.
+- Developed analytical API endpoints using FastAPI.
+- Implemented workflow orchestration with Dagster.
+- Used Docker for containerized development.
 
-**Link:** [GitHub Repository](https://github.com/hawaebrahimhamid/medical-telegram-warehouse)
+**Technologies:** Python, Telethon, YOLOv8, PostgreSQL, dbt, FastAPI, Dagster, Docker.
 
 ### 3. Brent Oil Change-Point Analysis — Full-Stack Data Application
 
-An interactive dashboard for exploring historical Brent crude oil prices, potential structural changes, and related events.
+**Live Dashboard:** [Open Dashboard](https://brent-oil-dashboard.vercel.app/) · **API:** [Open API](https://brent-oil-dashboard-api.onrender.com) · **GitHub:** [View Repository](https://github.com/hawaebrahimhamid/brent-oil-change-point-analysis)
+An interactive data application for exploring historical Brent crude oil prices, identifying potential structural changes, and examining related events.
 
-**Key contributions**
+**Key contributions:**
 
 - Prepared and analyzed time-series data using Python and Pandas.
-- Applied Bayesian change-point analysis with PyMC.
+- Applied Bayesian change-point analysis using PyMC.
 - Developed a Flask REST API.
-- Integrated analytical results into a React and Vite frontend.
-- Presented price trends and analytical findings through interactive visualizations.
+- Built an interactive dashboard using React and Vite.
+- Integrated analytical results and API endpoints into the frontend.
 
-**Links:** [Live Dashboard](https://brent-oil-dashboard.vercel.app/) · [GitHub Repository](https://github.com/hawaebrahimhamid/brent-oil-change-point-analysis)
+**Technologies:** Python, Pandas, PyMC, Flask, React, Vite, REST APIs.
 
-## About This Portfolio Project
+## Portfolio Website and AI Assistant
 
-This repository contains my portfolio website and an associated backend development project. It serves both as a professional showcase and as a practical way to strengthen my full-stack engineering skills.
+This repository contains my personal portfolio website and its associated backend and AI assistant.
 
-**Technology stack**
+The project demonstrates my practical experience integrating frontend development, backend engineering, databases, AI retrieval, and containerization.
 
-- Next.js, React, TypeScript, and Tailwind CSS
-- Python and FastAPI
-- PostgreSQL and SQLAlchemy
-- REST API design and request validation
-- Backend automated testing
-- AI assistant and portfolio knowledge-base development
+### Technology Stack
 
-Implementation and deployment status may vary by feature. See the code and tests for the functionality currently available.
+**Frontend**
 
-## Development Roadmap
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
 
-The project follows six development phases:
+**Backend**
 
-1. **Frontend foundation:** Responsive navigation, portfolio sections, and reusable components.
-2. **Recruiter experience:** Resume access, SEO, accessibility, responsive layouts, and project case studies.
-3. **Backend engineering:** FastAPI endpoints, database integration, contact functionality, validation, health checks, and tests.
-4. **RAG and AI assistant:** Knowledge preparation, embeddings, retrieval, LLM integration, and evidence-grounded responses.
-5. **AI engineering quality:** Evaluation, error handling, guardrails, and observability.
-6. **Production engineering:** Secure configuration, continuous integration, deployment, monitoring, and final quality checks.
+- Python
+- FastAPI
+- SQLAlchemy
+- REST APIs
 
-These phases describe the development plan, not a claim that every feature is complete. Features should be considered finished only after implementation and appropriate verification.
+**Database and AI**
 
-## Getting Started
+- PostgreSQL
+- pgvector
+- Sentence Transformers
+- Vector embeddings and semantic retrieval
+- Portfolio knowledge-base ingestion
+
+**Development and Infrastructure**
+
+- Docker and Docker Compose
+- CPU-only PyTorch backend image
+- pytest
+- Git and GitHub
+
+### AI Assistant
+
+The portfolio includes an AI assistant designed to answer questions about my background, skills, training, and projects using information from a prepared portfolio knowledge base.
+
+The implementation includes:
+
+- Knowledge preparation and text chunking.
+- Embedding generation using Sentence Transformers.
+- Vector storage and similarity retrieval with PostgreSQL and pgvector.
+- Backend API integration through FastAPI.
+- Retrieval evaluation and testing.
+- Handling of unsupported or unrelated questions.
+
+The assistant is intended to provide visitors and recruiters with a convenient way to explore my technical background and project experience.
+
+## Docker and Local Development
+
+The project includes a Docker-based setup for running the frontend, backend, and PostgreSQL database together.
 
 ### Prerequisites
 
 - Git
-- Node.js and npm
-- Python
-- PostgreSQL
-- A Google Gemini API key for features that require it
+- Docker Desktop with Docker Compose
+- A Google Gemini API key for backend features that require it
 
 ### 1. Clone the repository
 
@@ -116,54 +163,90 @@ git clone https://github.com/hawaebrahimhamid/ai-portfolio.git
 cd ai-portfolio
 ```
 
-### 2. Run the frontend
+### 2. Configure backend environment variables
+
+In Windows PowerShell:
+
+```powershell
+Copy-Item backend/.env.example backend/.env
+```
+
+Open `backend/.env` and configure the required environment variables, including your Gemini API key.
+
+Do not commit `.env` files or expose API keys publicly.
+
+The Docker Compose configuration supplies the internal PostgreSQL connection to the backend. For local development outside Docker, use the appropriate local database connection settings.
+
+### 3. Build and start the application
+
+From the repository root:
+
+```bash
+docker compose up --build -d
+```
+
+This builds and starts the three application services:
+
+| Service  | Purpose                   | Local address         |
+| -------- | ------------------------- | --------------------- |
+| Frontend | Next.js portfolio website | http://localhost:3000 |
+| Backend  | FastAPI application       | http://localhost:8000 |
+| Database | PostgreSQL with pgvector  | localhost:5433        |
+
+The database is available on port `5433` from the host machine. Inside Docker Compose, the backend connects to the database using the internal service address.
+
+The backend startup process initializes the database and imports the portfolio knowledge base as configured.
+
+### 4. Verify running services
+
+Check the service status:
+
+```bash
+docker compose ps
+```
+
+Check application logs:
+
+```bash
+docker compose logs --tail=80 backend frontend db
+```
+
+Check backend health:
+
+```bash
+curl http://localhost:8000/health
+```
+
+- Health endpoint: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+- Database readiness: [http://127.0.0.1:8000/ready](http://127.0.0.1:8000/ready)
+- Interactive API documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+### 5. Stop the application
+
+```bash
+docker compose down
+```
+
+This stops and removes the Compose containers and network while preserving named volumes by default.
+
+Do not use `docker compose down -v` unless you intentionally want to delete the persistent database and model-cache volumes.
+
+## Running Without Docker
+
+For frontend development, install dependencies and start Next.js:
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-To check the frontend:
+Run the frontend production checks:
 
 ```bash
 npm run lint
 npm run build
 ```
 
-To run the optimized production build locally, after building, run:
-
-```bash
-npm run start
-```
-
-### 3. Configure and run the backend
-
-In Windows PowerShell, from the repository root, create a local environment file:
-
-```powershell
-Copy-Item backend/.env.example backend/.env
-```
-
-Edit `backend/.env` and configure your own PostgreSQL connection and Gemini API key:
-
-```dotenv
-DATABASE_URL=postgresql+psycopg://USER:PASSWORD@HOST:5432/DATABASE
-GEMINI_API_KEY=your_gemini_api_key_here
-```
-
-Replace the placeholders with your actual local configuration. Create the PostgreSQL database before initializing the tables.
-
-Enable the pgvector extension in that database before initializing the tables. For a local PostgreSQL installation, replace `DATABASE` with your database name and run:
-
-```bash
-psql -U postgres -d DATABASE -c "CREATE EXTENSION IF NOT EXISTS vector;"
-```
-
-Your PostgreSQL server must have the pgvector extension installed and available.
-
-Create a Python virtual environment and install the backend dependencies:
+For backend development, create and activate a Python virtual environment from the repository root:
 
 ```powershell
 python -m venv backend/.venv
@@ -171,7 +254,9 @@ python -m venv backend/.venv
 python -m pip install -r backend/requirements.txt
 ```
 
-Start the backend:
+Configure `backend/.env` with your local database connection and required API keys. Ensure PostgreSQL and pgvector are installed and running.
+
+Then initialize the database and start the backend:
 
 ```powershell
 Set-Location backend
@@ -179,23 +264,51 @@ python init_db.py
 python -m uvicorn main:app --reload
 ```
 
-The API runs locally at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+The backend runs at:
 
-- Health endpoint: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
-- Database readiness: [http://127.0.0.1:8000/ready](http://127.0.0.1:8000/ready)
-- Interactive API documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+http://127.0.0.1:8000
 
-Run the frontend and backend in separate terminal windows.
+Run backend tests from the repository root:
 
-### 4. Run backend tests
-
-With the backend Python environment activated, run this from the repository root:
-
-```bash
-python -m pytest -q
+```powershell
+python -m pytest backend/tests -q
 ```
 
-The backend test suite most recently passed **35 tests** during development. Test results may change as the code evolves.
+## Testing and Verification
+
+The application has undergone local development and integration testing.
+
+**Latest recorded verification results:**
+
+| Verification                                 | Result    |
+| -------------------------------------------- | --------- |
+| Frontend Docker production build             | Passed    |
+| Frontend HTTP response                       | HTTP 200  |
+| Backend health and readiness                 | Passed    |
+| AI assistant relevant questions              | Passed    |
+| AI assistant unrelated-question handling     | Passed    |
+| Desktop and mobile navigation checks         | Passed    |
+| Contact form validation                      | Passed    |
+| Contact form frontend-to-backend integration | Passed    |
+| PostgreSQL contact-message persistence       | Passed    |
+| Backend automated test suite                 | 35 passed |
+
+The backend test run completed with 35 passing tests and one dependency deprecation warning.
+
+These results describe the local verification performed during development. They are not a claim of production deployment or production monitoring.
+
+## Development Roadmap
+
+The portfolio has been developed through six main phases:
+
+1. **Frontend foundation:** Responsive navigation, reusable components, and portfolio sections.
+2. **Recruiter experience:** Resume access, SEO, accessibility, responsive layouts, and project case studies.
+3. **Backend engineering:** FastAPI endpoints, PostgreSQL integration, contact functionality, validation, health checks, and tests.
+4. **RAG and AI assistant:** Knowledge preparation, embeddings, vector retrieval, and evidence-grounded responses.
+5. **AI engineering quality:** Retrieval evaluation, error handling, guardrails, and testing.
+6. **Production engineering:** Docker configuration, CPU-only backend setup, frontend production image, and application verification.
+
+The current repository includes the Docker-based local application setup. Public deployment of this portfolio website remains a separate next milestone.
 
 ## Repository Structure
 
@@ -211,8 +324,15 @@ ai-portfolio/
 │   ├── portfolio_assistant.py
 │   ├── requirements.txt
 │   └── .env.example
+├── docker/
+│   └── postgres/
+│       └── init.sql
 ├── public/
 ├── src/
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
+├── next.config.ts
 ├── package.json
 ├── package-lock.json
 └── README.md
@@ -221,13 +341,10 @@ ai-portfolio/
 ## Contact
 
 **Hawa Ebrahim Hamid**
-
 AI Engineer & Full-Stack Developer | Project-Based Experience
-
 Addis Ababa, Ethiopia
 
 - **Email:** [hawaebrahimhamid@gmail.com](mailto:hawaebrahimhamid@gmail.com)
-- **GitHub:** [hawaebrahimhamid](https://github.com/hawaebrahimhamid)
-- **LinkedIn:** [hawa-ebrahim-hamid](https://linkedin.com/in/hawa-ebrahim-hamid)
-
-I'm interested in opportunities in applied AI, backend engineering, and full-stack development where I can contribute through practical project work and continue growing as an engineer.
+- **GitHub:** [github.com/hawaebrahimhamid](https://github.com/hawaebrahimhamid)
+- **LinkedIn:** [linkedin.com/in/hawa-ebrahim-hamid](https://linkedin.com/in/hawa-ebrahim-hamid)
+  I'm interested in opportunities in applied AI, AI engineering, backend development, and full-stack software development.
