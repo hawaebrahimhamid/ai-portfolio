@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { FiArrowUpRight, FiCheckCircle } from "react-icons/fi";
+
 
 export default function About() {
   return (
