@@ -64,14 +64,6 @@ export default function Hero() {
               </span>
             </motion.h1>
 
-            {/* Supporting Focus */}
-            <motion.p
-              variants={fadeUp}
-              className="mt-5 text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300 sm:text-base"
-            >
-              Generative AI · RAG · LLM Applications · Full-Stack Engineering
-            </motion.p>
-
             {/* Description */}
             <motion.p
               variants={fadeUp}
