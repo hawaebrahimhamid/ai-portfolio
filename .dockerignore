@@ -25,3 +25,6 @@ coverage
 assistant-review.txt
 diff-review.txt
 tests-review.txt
+
+backend/knowledge/portfolio_embeddings.json
+*.log

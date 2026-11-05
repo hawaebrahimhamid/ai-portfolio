@@ -29,12 +29,12 @@ def main():
         statement = (
             select(PortfolioKnowledge, distance.label("distance"))
             .order_by(distance)
-            .limit(3)
+            .limit(5)
         )
 
         results = session.execute(statement).all()
 
-    print("\nTop 3 matching knowledge chunks:")
+    print("\nTop 5 matching knowledge chunks:")
 
     for rank, (chunk, score) in enumerate(results, start=1):
         print(f"\n{rank}. Chunk ID: {chunk.chunk_id}")
