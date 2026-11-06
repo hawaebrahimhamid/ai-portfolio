@@ -1,4 +1,7 @@
 
+import httpx
+from google import genai
+from google.genai import types
 import importlib
 import sys
 from types import SimpleNamespace
@@ -272,3 +275,76 @@ def test_answer_question_rejects_non_string_input(assistant):
     answer = assistant.answer_question(None)
 
     assert answer == "Please enter a valid text question."
+
+
+def test_gemini_sdk_retries_temporary_503_responses():
+    """Verify that the Gemini SDK retries 503 responses and then succeeds."""
+
+    request_count = 0
+
+    def mock_handler(request):
+        nonlocal request_count
+        request_count += 1
+
+        if request_count <= 2:
+            return httpx.Response(
+                503,
+                json={
+                    "error": {
+                        "code": 503,
+                        "message": "Service temporarily unavailable",
+                        "status": "UNAVAILABLE",
+                    }
+                },
+            )
+
+        return httpx.Response(
+            200,
+            json={
+                "candidates": [
+                    {
+                        "content": {
+                            "parts": [
+                                {"text": "Recovered after retry"}
+                            ],
+                            "role": "model",
+                        },
+                        "finishReason": "STOP",
+                        "index": 0,
+                    }
+                ],
+                "modelVersion": "gemini-3.5-flash-lite",
+            },
+        )
+
+    http_client = httpx.Client(
+        transport=httpx.MockTransport(mock_handler)
+    )
+
+    sdk_client = genai.Client(
+        api_key="test-key",
+        http_options=types.HttpOptions(
+            httpx_client=http_client,
+            retry_options=types.HttpRetryOptions(
+                attempts=3,
+                initial_delay=0.01,
+                max_delay=0.01,
+                exp_base=2.0,
+                jitter=0.0,
+                http_status_codes=[503],
+            ),
+        ),
+    )
+
+    try:
+        response = sdk_client.models.generate_content(
+            model="gemini-3.5-flash-lite",
+            contents="Reply with a short test response.",
+        )
+
+        assert response.text == "Recovered after retry"
+        assert request_count == 3
+
+    finally:
+        sdk_client.close()
+        http_client.close()
