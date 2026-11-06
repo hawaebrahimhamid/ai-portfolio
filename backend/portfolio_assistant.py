@@ -1,11 +1,11 @@
 
 import logging
 import os
-import time
 
 from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 from sentence_transformers import SentenceTransformer
 from sqlalchemy import select
 
@@ -26,7 +26,6 @@ TOP_K = 5
 MAX_CONTEXT_CHUNKS = 8
 MAX_OUTPUT_TOKENS = 2048
 MAX_QUESTION_LENGTH = 1000
-MAX_ATTEMPTS = 3
 
 EMPTY_ANSWER = (
     "Sorry, I couldn't generate an answer just now. "
@@ -53,7 +52,20 @@ if not api_key:
         "GEMINI_API_KEY is missing. Check your backend/.env file."
     )
 
-client = genai.Client(api_key=api_key)
+client = genai.Client(
+    api_key=api_key,
+    http_options=types.HttpOptions(
+        timeout=30_000,
+        retry_options=types.HttpRetryOptions(
+            attempts=3,
+            initial_delay=1.0,
+            max_delay=4.0,
+            exp_base=2.0,
+            jitter=1.0,
+            http_status_codes=[408, 429, 500, 502, 503, 504],
+        ),
+    ),
+)
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
 
 
@@ -240,63 +252,17 @@ Write the answer now.
 """
 
 
-def generate_with_retry(prompt: str, max_attempts: int = MAX_ATTEMPTS):
-    """Generate a Gemini response, retrying temporary service failures."""
+def generate_with_retry(prompt: str):
+    """Generate a Gemini response using SDK-managed retry handling."""
 
-    if not isinstance(max_attempts, int) or isinstance(max_attempts, bool):
-        raise ValueError("max_attempts must be an integer.")
-
-    if max_attempts < 1:
-        raise ValueError("max_attempts must be at least 1.")
-
-    for attempt in range(max_attempts):
-        try:
-            return client.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=prompt,
-                config={
-                    "temperature": 0.2,
-                    "max_output_tokens": MAX_OUTPUT_TOKENS,
-                },
-            )
-
-        except Exception as exc:
-            error_text = str(exc).lower()
-            error_type = type(exc).__name__.lower()
-
-            retryable_markers = (
-                "503",
-                "429",
-                "unavailable",
-                "timeout",
-                "timed out",
-                "remoteprotocolerror",
-                "connectionerror",
-            )
-
-            is_retryable = any(
-                marker in error_text or marker in error_type
-                for marker in retryable_markers
-            )
-
-            # Do not retry permanent failures or the final attempt.
-            if not is_retryable or attempt == max_attempts - 1:
-                raise
-
-            wait_seconds = 2 ** (attempt + 1)
-
-            logger.warning(
-                "Temporary Gemini failure (%s). Retrying in %s seconds "
-                "(attempt %s/%s).",
-                type(exc).__name__,
-                wait_seconds,
-                attempt + 2,
-                max_attempts,
-            )
-
-            time.sleep(wait_seconds)
-
-    raise RuntimeError("Gemini generation failed after all retries.")
+    return client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config={
+            "temperature": 0.2,
+            "max_output_tokens": MAX_OUTPUT_TOKENS,
+        },
+    )
 
 
 def validate_generated_answer(response) -> str | None:

@@ -16,11 +16,19 @@ def assistant(monkeypatch):
     import google.genai as genai
     import sentence_transformers
 
+    client_config = {}
+
+    def mock_genai_client(**kwargs):
+        """Capture Gemini client configuration without creating a real client."""
+        client_config.update(kwargs)
+        return Mock()
+
     monkeypatch.setattr(
         genai,
         "Client",
-        lambda **kwargs: Mock(),
+        mock_genai_client,
     )
+
     monkeypatch.setattr(
         sentence_transformers,
         "SentenceTransformer",
@@ -29,6 +37,8 @@ def assistant(monkeypatch):
 
     sys.modules.pop("portfolio_assistant", None)
     module = importlib.import_module("portfolio_assistant")
+
+    module._test_client_config = client_config
 
     yield module
 
@@ -61,6 +71,7 @@ def test_no_retrieved_evidence_does_not_call_gemini(assistant, monkeypatch):
         "retrieve_knowledge",
         lambda question: [],
     )
+
     generator = Mock(
         side_effect=AssertionError("Gemini should not be called")
     )
@@ -81,6 +92,7 @@ def test_project_question_uses_retrieved_evidence(assistant, monkeypatch):
     """Pass retrieved portfolio evidence to the answer generator."""
 
     evidence = "CrediTrust is a RAG-based complaint assistant."
+
     monkeypatch.setattr(
         assistant,
         "retrieve_knowledge",
@@ -107,60 +119,47 @@ def test_project_question_uses_retrieved_evidence(assistant, monkeypatch):
     assert "Do not invent employment history" in prompt
 
 
-def test_generate_with_retry_retries_temporary_failure(
-    assistant, monkeypatch
-):
-    """Retry a temporary Gemini error and return the successful response."""
+def test_generate_with_retry_uses_sdk_client(assistant):
+    """Delegate Gemini generation to the SDK client."""
 
-    response = SimpleNamespace(text="Successful Gemini response")
+    response = SimpleNamespace(
+        text="Successful Gemini response"
+    )
 
-    assistant.client.models.generate_content.side_effect = [
-        RuntimeError("503 service unavailable"),
-        response,
-    ]
-    sleep_mock = Mock()
-    monkeypatch.setattr(assistant.time, "sleep", sleep_mock)
+    assistant.client.models.generate_content.return_value = response
 
     result = assistant.generate_with_retry("Test prompt")
 
     assert result is response
-    assert assistant.client.models.generate_content.call_count == 2
-    sleep_mock.assert_called_once_with(2)
 
-
-def test_generate_with_retry_stops_after_max_attempts(
-    assistant, monkeypatch
-):
-    """Stop retrying after the configured number of attempts."""
-
-    assistant.client.models.generate_content.side_effect = (
-        RuntimeError("503 service unavailable")
+    assistant.client.models.generate_content.assert_called_once_with(
+        model=assistant.GEMINI_MODEL,
+        contents="Test prompt",
+        config={
+            "temperature": 0.2,
+            "max_output_tokens": assistant.MAX_OUTPUT_TOKENS,
+        },
     )
-    sleep_mock = Mock()
-    monkeypatch.setattr(assistant.time, "sleep", sleep_mock)
 
-    with pytest.raises(RuntimeError, match="503 service unavailable"):
-        assistant.generate_with_retry("Test prompt", max_attempts=3)
 
-    assert assistant.client.models.generate_content.call_count == 3
-    assert [call.args[0] for call in sleep_mock.call_args_list] == [2, 4]
+def test_gemini_sdk_retry_configuration(assistant):
+    """Verify timeout and SDK-managed retry settings."""
 
-def test_generate_with_retry_does_not_retry_non_retryable_error(
-    assistant, monkeypatch
-):
-    """Raise non-retryable errors immediately."""
+    http_options = assistant._test_client_config["http_options"]
+    retry_options = http_options.retry_options
 
-    assistant.client.models.generate_content.side_effect = (
-        ValueError("Invalid request")
-    )
-    sleep_mock = Mock()
-    monkeypatch.setattr(assistant.time, "sleep", sleep_mock)
+    assert http_options.timeout == 30000
 
-    with pytest.raises(ValueError, match="Invalid request"):
-        assistant.generate_with_retry("Test prompt")
+    assert retry_options.attempts == 3
+    assert retry_options.initial_delay == 1.0
+    assert retry_options.max_delay == 4.0
+    assert retry_options.exp_base == 2.0
+    assert retry_options.jitter == 1.0
 
-    assistant.client.models.generate_content.assert_called_once()
-    sleep_mock.assert_not_called()
+    assert retry_options.http_status_codes == [
+        408, 429, 500, 502, 503, 504
+    ]
+
 
 def test_empty_gemini_response_returns_safe_fallback(
     assistant, monkeypatch
@@ -194,7 +193,6 @@ def test_empty_gemini_response_returns_safe_fallback(
     generator.assert_called_once()
 
 
-
 def test_retrieval_error_returns_safe_fallback(assistant, monkeypatch):
     """Handle database or knowledge-retrieval errors safely."""
 
@@ -218,6 +216,8 @@ def test_retrieval_error_returns_safe_fallback(assistant, monkeypatch):
 
 
 def test_build_prompt_includes_question_and_evidence(assistant):
+    """Ensure the prompt includes the question and retrieved evidence."""
+
     question = "What does the CrediTrust project do?"
     context = "CrediTrust is a RAG-based complaint assistant."
 
@@ -229,6 +229,8 @@ def test_build_prompt_includes_question_and_evidence(assistant):
 
 
 def test_build_prompt_preserves_grounding_rules(assistant):
+    """Ensure the prompt preserves portfolio grounding instructions."""
+
     prompt = assistant.build_prompt(
         "What experience does Hawa have?",
         "Hawa has completed independent software projects.",
@@ -240,7 +242,7 @@ def test_build_prompt_preserves_grounding_rules(assistant):
 
 
 def test_validate_generated_answer_returns_nonempty_text(assistant):
-    from types import SimpleNamespace
+    """Return trimmed text from a valid Gemini response."""
 
     response = SimpleNamespace(
         candidates=[],
@@ -254,21 +256,19 @@ def test_validate_generated_answer_returns_nonempty_text(assistant):
 
 
 def test_validate_generated_answer_rejects_empty_text(assistant):
-    from types import SimpleNamespace
+    """Reject an empty Gemini response."""
 
-    response = SimpleNamespace(candidates=[], text="  ")
+    response = SimpleNamespace(
+        candidates=[],
+        text="  ",
+    )
 
     assert assistant.validate_generated_answer(response) is None
 
 
 def test_answer_question_rejects_non_string_input(assistant):
+    """Reject invalid question input."""
+
     answer = assistant.answer_question(None)
 
     assert answer == "Please enter a valid text question."
-
-
-def test_generate_with_retry_rejects_zero_attempts(assistant):
-    import pytest
-
-    with pytest.raises(ValueError, match="max_attempts must be at least 1"):
-        assistant.generate_with_retry("Test prompt", max_attempts=0)
