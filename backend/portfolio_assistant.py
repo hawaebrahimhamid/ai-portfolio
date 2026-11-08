@@ -3,21 +3,31 @@ import logging
 import os
 
 from pathlib import Path
+from threading import Lock
+
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from sentence_transformers import SentenceTransformer
 from sqlalchemy import select
 
 from database import SessionLocal
 from models import PortfolioKnowledge
 
 
+# -------------------------
+# Environment and logging
+# -------------------------
+
 load_dotenv(
     dotenv_path=Path(__file__).resolve().parent / ".env"
 )
 
 logger = logging.getLogger(__name__)
+
+
+# -------------------------
+# Model configuration
+# -------------------------
 
 GEMINI_MODEL = "gemini-3.5-flash-lite"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
@@ -26,6 +36,11 @@ TOP_K = 5
 MAX_CONTEXT_CHUNKS = 8
 MAX_OUTPUT_TOKENS = 2048
 MAX_QUESTION_LENGTH = 1000
+
+
+# -------------------------
+# Standard responses
+# -------------------------
 
 EMPTY_ANSWER = (
     "Sorry, I couldn't generate an answer just now. "
@@ -42,8 +57,18 @@ UNAVAILABLE_ANSWER = (
     "Please try again shortly."
 )
 
-INVALID_QUESTION_ANSWER = "Please enter a valid text question."
-MISSING_QUESTION_ANSWER = "Please enter a question."
+INVALID_QUESTION_ANSWER = (
+    "Please enter a valid text question."
+)
+
+MISSING_QUESTION_ANSWER = (
+    "Please enter a question."
+)
+
+
+# -------------------------
+# Gemini configuration
+# -------------------------
 
 api_key = os.getenv("GEMINI_API_KEY")
 
@@ -62,12 +87,76 @@ client = genai.Client(
             max_delay=4.0,
             exp_base=2.0,
             jitter=1.0,
-            http_status_codes=[408, 429, 500, 502, 503, 504],
+            http_status_codes=[
+                408,
+                429,
+                500,
+                502,
+                503,
+                504,
+            ],
         ),
     ),
 )
-embedding_model = SentenceTransformer(EMBEDDING_MODEL)
 
+
+# -------------------------
+# Lazy embedding model
+# -------------------------
+
+_embedding_model = None
+
+_embedding_model_lock = Lock()
+
+# Serialize embedding inference to reduce concurrent
+# model-processing memory pressure on the small Render instance.
+_embedding_inference_lock = Lock()
+
+
+def get_embedding_model():
+    """Load the embedding model only when it is first needed."""
+
+    global _embedding_model
+
+    if _embedding_model is None:
+        with _embedding_model_lock:
+
+            if _embedding_model is None:
+                from sentence_transformers import SentenceTransformer
+
+                logger.info(
+                    "Loading sentence transformer model."
+                )
+
+                _embedding_model = SentenceTransformer(
+                    EMBEDDING_MODEL,
+                    device="cpu",
+                )
+
+                logger.info(
+                    "Sentence transformer model loaded."
+                )
+
+    return _embedding_model
+
+
+def create_query_embedding(question: str) -> list[float]:
+    """Generate a normalized query embedding using the lazy model."""
+
+    model = get_embedding_model()
+
+    with _embedding_inference_lock:
+        embedding = model.encode(
+            question,
+            normalize_embeddings=True,
+        )
+
+    return embedding.tolist()
+
+
+# -------------------------
+# Project identification
+# -------------------------
 
 PROJECT_NAMES = {
     "medical-telegram-warehouse": (
@@ -107,8 +196,14 @@ EXPERIENCE_KEYWORDS = (
 )
 
 
-def is_experience_background_question(question: str) -> bool:
-    """Identify questions about documented career background or training."""
+# -------------------------
+# Question classification
+# -------------------------
+
+def is_experience_background_question(
+    question: str,
+) -> bool:
+    """Identify questions about documented career background."""
 
     question_lower = question.lower()
 
@@ -119,22 +214,34 @@ def is_experience_background_question(question: str) -> bool:
         "professional" in question_lower
         and any(
             keyword in question_lower
-            for keyword in ("experience", "employment", "career")
+            for keyword in (
+                "experience",
+                "employment",
+                "career",
+            )
         )
     )
 
 
 def find_project_id(question: str) -> str | None:
-    """Identify a project explicitly mentioned in the question."""
+    """Identify a project explicitly mentioned in a question."""
 
     question_lower = question.lower()
 
     for project_id, names in PROJECT_NAMES.items():
-        if any(name in question_lower for name in names):
+
+        if any(
+            name in question_lower
+            for name in names
+        ):
             return project_id
 
     return None
 
+
+# -------------------------
+# Knowledge retrieval
+# -------------------------
 
 def retrieve_knowledge(question: str) -> list[str]:
     """Retrieve relevant portfolio knowledge from PostgreSQL."""
@@ -145,30 +252,41 @@ def retrieve_knowledge(question: str) -> list[str]:
         return []
 
     question_lower = question.lower()
+
     selected_project_id = find_project_id(question)
 
-    is_background_question = is_experience_background_question(question)
+    is_background_question = (
+        is_experience_background_question(question)
+    )
 
-    is_project_question = not is_background_question and (
-        selected_project_id is not None
-        or any(
-            keyword in question_lower
-            for keyword in PROJECT_KEYWORDS
+    is_project_question = (
+        not is_background_question
+        and (
+            selected_project_id is not None
+            or any(
+                keyword in question_lower
+                for keyword in PROJECT_KEYWORDS
+            )
         )
     )
 
-    query_embedding = embedding_model.encode(
-        question,
-        normalize_embeddings=True,
-    ).tolist()
+    # Generate the query embedding.
+    query_embedding = create_query_embedding(question)
 
-    with SessionLocal() as session:
-        distance = PortfolioKnowledge.embedding.cosine_distance(
+    # Calculate cosine distance before constructing the query.
+    distance = (
+        PortfolioKnowledge.embedding.cosine_distance(
             query_embedding
         )
+    )
+
+    with SessionLocal() as session:
 
         statement = (
-            select(PortfolioKnowledge, distance.label("distance"))
+            select(
+                PortfolioKnowledge,
+                distance.label("distance"),
+            )
             .order_by(distance)
         )
 
@@ -181,41 +299,64 @@ def retrieve_knowledge(question: str) -> list[str]:
             statement.limit(TOP_K)
         ).all()
 
-        retrieved_chunks = [chunk for chunk, _ in results]
+        retrieved_chunks = [
+            chunk
+            for chunk, _ in results
+        ]
 
         # Include project overviews for broad project questions.
-        if is_project_question and not selected_project_id:
+        if (
+            is_project_question
+            and not selected_project_id
+        ):
+
             overview_statement = (
                 select(PortfolioKnowledge)
                 .where(
                     PortfolioKnowledge.source == "project",
-                    PortfolioKnowledge.chunk_id.like("%-overview"),
+                    PortfolioKnowledge.chunk_id.like(
+                        "%-overview"
+                    ),
                 )
-                .order_by(PortfolioKnowledge.chunk_id)
+                .order_by(
+                    PortfolioKnowledge.chunk_id
+                )
             )
 
             overview_chunks = session.scalars(
                 overview_statement
             ).all()
 
-            retrieved_chunks = overview_chunks + retrieved_chunks
+            retrieved_chunks = (
+                overview_chunks + retrieved_chunks
+            )
 
     # Remove duplicate chunks while preserving retrieval order.
     unique_chunks = []
+
     seen_chunk_ids = set()
 
     for chunk in retrieved_chunks:
+
         if chunk.chunk_id in seen_chunk_ids:
             continue
 
         seen_chunk_ids.add(chunk.chunk_id)
+
         unique_chunks.append(chunk.text)
 
     return unique_chunks[:MAX_CONTEXT_CHUNKS]
 
 
-def build_prompt(question: str, context: str) -> str:
-    """Build a grounded prompt using the question and retrieved evidence."""
+# -------------------------
+# Prompt construction
+# -------------------------
+
+def build_prompt(
+    question: str,
+    context: str,
+) -> str:
+    """Build an evidence-grounded portfolio assistant prompt."""
 
     return f"""You are the professional portfolio assistant for
 Hawa Ebrahim Hamid.
@@ -252,8 +393,12 @@ Write the answer now.
 """
 
 
+# -------------------------
+# Gemini response generation
+# -------------------------
+
 def generate_with_retry(prompt: str):
-    """Generate a Gemini response using SDK-managed retry handling."""
+    """Generate a Gemini response using SDK-managed retries."""
 
     return client.models.generate_content(
         model=GEMINI_MODEL,
@@ -265,12 +410,21 @@ def generate_with_retry(prompt: str):
     )
 
 
-def validate_generated_answer(response) -> str | None:
-    """Extract a non-empty answer from the Gemini response."""
+# -------------------------
+# Response validation
+# -------------------------
 
-    candidates = getattr(response, "candidates", None) or []
+def validate_generated_answer(
+    response,
+) -> str | None:
+    """Extract a non-empty answer from a Gemini response."""
+
+    candidates = (
+        getattr(response, "candidates", None) or []
+    )
 
     if candidates:
+
         finish_reason = getattr(
             candidates[0],
             "finish_reason",
@@ -281,22 +435,35 @@ def validate_generated_answer(response) -> str | None:
             "Gemini response finish reason: %s",
             finish_reason,
         )
-    else:
-        logger.warning("Gemini returned no response candidates.")
 
-    answer = (getattr(response, "text", None) or "").strip()
+    else:
+        logger.warning(
+            "Gemini returned no response candidates."
+        )
+
+    answer = (
+        getattr(response, "text", None) or ""
+    ).strip()
 
     if not answer:
-        logger.warning("Gemini returned an empty response.")
+
+        logger.warning(
+            "Gemini returned an empty response."
+        )
+
         return None
 
     return answer
 
 
-def answer_question(question: str) -> str:
-    """Answer questions using Hawa's documented portfolio information."""
+# -------------------------
+# Main assistant function
+# -------------------------
 
-    # Stage 0: Validate user input.
+def answer_question(question: str) -> str:
+    """Answer questions using documented portfolio information."""
+
+    # Stage 0: Validate visitor input.
     if not isinstance(question, str):
         return INVALID_QUESTION_ANSWER
 
@@ -315,6 +482,7 @@ def answer_question(question: str) -> str:
 
     # Preserve the documented career-background response.
     if is_experience_background_question(question):
+
         return (
             "Hawa demonstrates her software development skills through "
             "independent projects and technical training in AI, machine "
@@ -332,6 +500,7 @@ def answer_question(question: str) -> str:
             or "technical approach" in question_lower
         )
     ):
+
         return (
             "The Brent Oil Change Point Dashboard is an interactive "
             "application for exploring Brent crude oil prices and "
@@ -348,22 +517,26 @@ def answer_question(question: str) -> str:
         )
 
     try:
+
         # Stage 1: Retrieve relevant evidence.
         knowledge_chunks = retrieve_knowledge(question)
 
         if not knowledge_chunks:
             return NO_EVIDENCE_ANSWER
 
-        # Stage 2: Prepare the context.
+        # Stage 2: Prepare context.
         context = "\n\n".join(knowledge_chunks)
 
-        # Stage 3: Build the prompt.
-        prompt = build_prompt(question, context)
+        # Stage 3: Build prompt.
+        prompt = build_prompt(
+            question,
+            context,
+        )
 
-        # Stage 4: Generate a response.
+        # Stage 4: Generate Gemini response.
         response = generate_with_retry(prompt)
 
-        # Stage 5: Validate the generated response.
+        # Stage 5: Validate response.
         answer = validate_generated_answer(response)
 
         if answer is None:
@@ -372,7 +545,8 @@ def answer_question(question: str) -> str:
         return answer
 
     except Exception as exc:
-        # Log the error type, not the visitor's question or error details.
+
+        # Log the error type without exposing visitor input or secrets.
         logger.error(
             "Portfolio assistant request failed: %s",
             type(exc).__name__,
@@ -381,7 +555,12 @@ def answer_question(question: str) -> str:
         return UNAVAILABLE_ANSWER
 
 
+# -------------------------
+# Local manual tests
+# -------------------------
+
 if __name__ == "__main__":
+
     test_questions = [
         (
             "Does Hawa have several years of professional software "
@@ -393,6 +572,12 @@ if __name__ == "__main__":
     ]
 
     for test_question in test_questions:
-        print(f"\nQuestion: {test_question}\n")
-        print(f"Answer: {answer_question(test_question)}")
+        print(
+            f"\nQuestion: {test_question}\n"
+        )
+
+        print(
+            f"Answer: {answer_question(test_question)}"
+        )
+
         print("-" * 70)
