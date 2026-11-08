@@ -51,13 +51,13 @@ app.add_middleware(
     max_body_size=16 * 1024,
 )
 
-# Allow requests from the local Next.js development website.
-# Add your exact production website origin when deployment is ready.
+# Allow requests from local development and the production website.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://ai-portfolio-virid-three.vercel.app",
     ],
     allow_credentials=False,
     allow_methods=["GET", "POST"],
