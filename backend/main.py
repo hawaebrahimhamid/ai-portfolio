@@ -25,8 +25,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 # Configure backend logging.
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
+logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Hawa's Portfolio API",
     description=(
