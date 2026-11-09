@@ -320,8 +320,17 @@ def chat_with_portfolio(
             detail="Please enter a question.",
         )
 
+    start_time = time.perf_counter()
+
     try:
         answer = answer_question(question)
+
+        duration_ms = (time.perf_counter() - start_time) * 1000
+
+        logger.info(
+            "portfolio_chat_completed duration_ms=%.2f",
+            duration_ms,
+        )
 
         if not answer or not answer.strip():
             raise HTTPException(
