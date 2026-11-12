@@ -1,25 +1,21 @@
 
-from sentence_transformers import SentenceTransformer
 from sqlalchemy import select
 
 from database import SessionLocal
 from models import PortfolioKnowledge
+from portfolio_assistant import create_query_embedding
 
 
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+QUESTION = "What AI and full-stack projects has Hawa built?"
 
 
 def main():
-    question = "What AI and full-stack projects has Hawa built?"
+    print(f"Question: {QUESTION}")
+    print("Generating Gemini query embedding...")
 
-    print(f"Question: {question}")
-    print("Generating question embedding...")
+    query_embedding = create_query_embedding(QUESTION)
 
-    model = SentenceTransformer(MODEL_NAME)
-    query_embedding = model.encode(
-        question,
-        normalize_embeddings=True,
-    ).tolist()
+    print(f"Embedding dimensions: {len(query_embedding)}")
 
     with SessionLocal() as session:
         distance = PortfolioKnowledge.embedding.cosine_distance(

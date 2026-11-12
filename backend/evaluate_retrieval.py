@@ -1,14 +1,14 @@
 ﻿
-"""Evaluate portfolio retrieval quality using ranked results and expected facts.
+"""Evaluate portfolio retrieval quality using Gemini embeddings.
 
 Run from the backend directory:
     python evaluate_retrieval.py
 
-This diagnostic evaluates retrieval results only. It does not evaluate
-the final Gemini-generated answer or establish a production threshold.
+This diagnostic evaluates retrieved knowledge chunks only.
+It does not evaluate the final Gemini-generated answer or establish
+a production relevance threshold.
 """
 
-from sentence_transformers import SentenceTransformer
 from sqlalchemy import select
 
 from database import SessionLocal
@@ -16,9 +16,10 @@ from models import PortfolioKnowledge
 from portfolio_assistant import (
     EMBEDDING_MODEL,
     TOP_K,
+    PROJECT_KEYWORDS,
+    create_query_embedding,
     find_project_id,
     is_experience_background_question,
-    PROJECT_KEYWORDS,
 )
 
 
@@ -67,7 +68,6 @@ EVALUATION_CASES = [
         "expected_chunk_terms": [],
         "diagnostic_only": True,
     },
-
     {
         "name": "CrediTrust embedding model",
         "question": "Which embedding model does the CrediTrust Complaint Assistant use?",
@@ -87,14 +87,14 @@ EVALUATION_CASES = [
         "expected_chunk_terms": ["brent-oil"],
     },
     {
-    "name": "Portfolio professional focus",
-    "question": "What are Hawa's professional focus areas?",
-    "expected_terms": [
-        "generative ai",
-        "full-stack web development",
-    ],
-    "expected_chunk_terms": ["owner-profile"],
-},
+        "name": "Portfolio professional focus",
+        "question": "What are Hawa's professional focus areas?",
+        "expected_terms": [
+            "generative ai",
+            "full-stack web development",
+        ],
+        "expected_chunk_terms": ["owner-profile"],
+    },
     {
         "name": "Unsupported medical diagnosis",
         "question": "What medical diagnosis does Hawa have?",
@@ -137,12 +137,12 @@ EVALUATION_CASES = [
         "expected_chunk_terms": [],
         "diagnostic_only": True,
     },
-
 ]
 
 
-def retrieve_chunks(model, case):
-    """Retrieve ranked chunks using the current portfolio retrieval rules."""
+def retrieve_chunks(case):
+    """Retrieve ranked knowledge chunks using Gemini query embeddings."""
+
     question = case["question"]
     question_lower = question.lower()
 
@@ -160,10 +160,8 @@ def retrieve_chunks(model, case):
         )
     )
 
-    query_embedding = model.encode(
-        question,
-        normalize_embeddings=True,
-    ).tolist()
+    # Generate a normalized 768-dimensional Gemini query embedding.
+    query_embedding = create_query_embedding(question)
 
     with SessionLocal() as session:
         distance = PortfolioKnowledge.embedding.cosine_distance(
@@ -184,8 +182,8 @@ def retrieve_chunks(model, case):
             statement.limit(TOP_K)
         ).all()
 
-        # Preserve the current behavior for general project questions:
-        # add overview chunks before the ranked results.
+        # Preserve the existing behavior for general project questions:
+        # include project overview chunks before ranked results.
         if is_project_question and not selected_project_id:
             overview_statement = (
                 select(PortfolioKnowledge)
@@ -212,7 +210,9 @@ def retrieve_chunks(model, case):
 
     for chunk, score in results:
         if chunk.chunk_id not in seen_ids:
-            retrieved.append((chunk, float(score), "ranked"))
+            retrieved.append(
+                (chunk, float(score), "ranked")
+            )
             seen_ids.add(chunk.chunk_id)
 
     return retrieved[:8]
@@ -220,6 +220,7 @@ def retrieve_chunks(model, case):
 
 def evaluate_case(case, retrieved):
     """Check expected evidence and return retrieval evaluation details."""
+
     retrieved_text = "\n".join(
         chunk.text for chunk, _, _ in retrieved
     ).lower()
@@ -232,7 +233,10 @@ def evaluate_case(case, retrieved):
 
     matching_ranks = [
         rank
-        for rank, (chunk, _, _) in enumerate(retrieved, start=1)
+        for rank, (chunk, _, _) in enumerate(
+            retrieved,
+            start=1,
+        )
         if any(
             term.lower() in chunk.chunk_id.lower()
             for term in case["expected_chunk_terms"]
@@ -269,10 +273,6 @@ def evaluate_case(case, retrieved):
 
 
 def main():
-    print("Loading embedding model...")
-
-    model = SentenceTransformer(EMBEDDING_MODEL)
-
     passed = 0
     failed = 0
     errored = 0
@@ -281,6 +281,7 @@ def main():
     print("\nPortfolio Retrieval Evaluation")
     print("=" * 65)
     print(f"Embedding model: {EMBEDDING_MODEL}")
+    print("Embedding dimensions: 768")
     print(f"Configured TOP_K: {TOP_K}")
     print(f"Evaluation cases: {len(EVALUATION_CASES)}")
 
@@ -288,7 +289,7 @@ def main():
         question = case["question"]
 
         try:
-            retrieved = retrieve_chunks(model, case)
+            retrieved = retrieve_chunks(case)
             result = evaluate_case(case, retrieved)
 
             status = result["status"]
@@ -320,7 +321,9 @@ def main():
             best_distance = result["best_distance"]
 
             if best_distance is not None:
-                print(f"Best cosine distance: {best_distance:.4f}")
+                print(
+                    f"Best cosine distance: {best_distance:.4f}"
+                )
             else:
                 print("Best cosine distance: unavailable")
 
@@ -349,7 +352,9 @@ def main():
             errored += 1
             print(f"\n[ERROR] {case['name']}")
             print(f"Question: {question}")
-            print(f"Error type: {type(exc).__name__}: {exc}")
+            print(
+                f"Error type: {type(exc).__name__}: {exc}"
+            )
 
     evaluated = passed + failed
 
@@ -363,11 +368,11 @@ def main():
     print(f"Total configured cases: {len(EVALUATION_CASES)}")
 
     print(
-        "\nPASS/FAIL cases check expected content terms and expected "
-        "chunk IDs. Diagnostic cases are excluded from those totals."
+        "\nPASS/FAIL cases check expected content terms and "
+        "expected chunk IDs. Diagnostic cases are excluded "
+        "from those totals."
     )
     print(
-        "This script evaluates retrieval, not Gemini answer quality. "
         "No production relevance threshold has been established."
     )
 

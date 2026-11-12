@@ -14,7 +14,7 @@ EMBEDDINGS_PATH = (
     / "portfolio_embeddings.json"
 )
 
-EXPECTED_DIMENSIONS = 384
+EXPECTED_DIMENSIONS = 768
 
 
 def main():

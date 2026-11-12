@@ -3,7 +3,6 @@ import logging
 import os
 
 from pathlib import Path
-from threading import Lock
 
 from dotenv import load_dotenv
 from google import genai
@@ -30,7 +29,8 @@ logger = logging.getLogger(__name__)
 # -------------------------
 
 GEMINI_MODEL = "gemini-3.5-flash-lite"
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL = "gemini-embedding-001"
+EMBEDDING_DIMENSIONALITY = 768
 
 TOP_K = 5
 MAX_CONTEXT_CHUNKS = 8
@@ -100,58 +100,37 @@ client = genai.Client(
 )
 
 
-# -------------------------
-# Lazy embedding model
-# -------------------------
-
-_embedding_model = None
-
-_embedding_model_lock = Lock()
-
-# Serialize embedding inference to reduce concurrent
-# model-processing memory pressure on the small Render instance.
-_embedding_inference_lock = Lock()
-
-
-def get_embedding_model():
-    """Load the embedding model only when it is first needed."""
-
-    global _embedding_model
-
-    if _embedding_model is None:
-        with _embedding_model_lock:
-
-            if _embedding_model is None:
-                from sentence_transformers import SentenceTransformer
-
-                logger.info(
-                    "Loading sentence transformer model."
-                )
-
-                _embedding_model = SentenceTransformer(
-                    EMBEDDING_MODEL,
-                    device="cpu",
-                )
-
-                logger.info(
-                    "Sentence transformer model loaded."
-                )
-
-    return _embedding_model
-
 
 def create_query_embedding(question: str) -> list[float]:
-    """Generate a normalized query embedding using the lazy model."""
+    """Generate a normalized query embedding using Gemini."""
 
-    model = get_embedding_model()
+    response = client.models.embed_content(
+        model=EMBEDDING_MODEL,
+        contents=question,
+        config=types.EmbedContentConfig(
+            task_type="RETRIEVAL_QUERY",
+            output_dimensionality=EMBEDDING_DIMENSIONALITY,
+        ),
+    )
 
-    with _embedding_inference_lock:
-        embedding = model.encode(
-            question,
-            normalize_embeddings=True,
+    if not response.embeddings:
+        raise ValueError("Gemini returned no query embedding.")
+
+    values = response.embeddings[0].values
+
+    if values is None or len(values) != EMBEDDING_DIMENSIONALITY:
+        raise ValueError(
+            f"Expected {EMBEDDING_DIMENSIONALITY} dimensions, "
+            f"received {len(values) if values else 0}."
         )
 
-    return embedding.tolist()
+    norm = sum(value * value for value in values) ** 0.5
+
+    if norm == 0:
+        raise ValueError("Gemini returned a zero-magnitude embedding.")
+
+    return [value / norm for value in values]
+
 
 
 # -------------------------

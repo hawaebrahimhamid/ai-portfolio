@@ -61,4 +61,4 @@ class PortfolioKnowledge(Base):
         nullable=False,
     )
 
-    embedding = mapped_column(Vector(384), nullable=False)
+    embedding = mapped_column(Vector(768), nullable=False)
