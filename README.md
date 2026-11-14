@@ -1,10 +1,16 @@
 # AI Engineer & Full-Stack Developer Portfolio
 
-A professional portfolio showcasing my hands-on projects in **AI engineering, machine learning, data engineering, and full-stack web development**. It includes an AI-powered portfolio assistant that uses semantic search and a large language model to answer questions about my background, technical skills, and projects.
+A professional portfolio showcasing my hands-on projects in **AI engineering, machine learning, data engineering, and full-stack web development**.
 
-**Live Portfolio:** Coming soon — public deployment pending.
+The portfolio includes an AI-powered assistant that uses semantic search, PostgreSQL with pgvector, and Google's Gemini API to answer questions about my background, technical skills, training, and projects.
 
-**GitHub Repository:** [ai-portfolio](https://github.com/hawaebrahimhamid/ai-portfolio)
+## Live Portfolio
+
+**Website:** https://hawaebrahim.vercel.app
+
+**Backend API:** https://ai-portfolio-txy2.onrender.com
+
+**GitHub Repository:** https://github.com/hawaebrahimhamid/ai-portfolio
 
 ---
 
@@ -12,9 +18,9 @@ A professional portfolio showcasing my hands-on projects in **AI engineering, ma
 
 I am an AI Engineer and Full-Stack Developer focused on building practical AI-powered applications and web solutions.
 
-My experience is demonstrated through independent software projects and technical training, where I have worked with Python, JavaScript, TypeScript, React, Next.js, FastAPI, Flask, PostgreSQL, and AI technologies.
+My technical experience is demonstrated through independent software projects and technical training. I have worked with Python, JavaScript, TypeScript, React, Next.js, FastAPI, Flask, PostgreSQL, and AI technologies.
 
-This portfolio brings together selected projects, technical skills, and an AI-powered assistant designed to help visitors explore my work.
+This portfolio brings together selected projects, technical skills, and an integrated AI assistant designed to help visitors explore my work.
 
 ## Technical Skills
 
@@ -47,8 +53,10 @@ This portfolio brings together selected projects, technical skills, and an AI-po
 ### AI & Machine Learning
 - Large Language Models (LLMs)
 - Retrieval-Augmented Generation (RAG)
+- Semantic Search
 - Sentence Transformers
 - FAISS
+- Google Gemini API
 - Prompt Engineering
 - Pandas
 - PyMC
@@ -70,10 +78,10 @@ This portfolio brings together selected projects, technical skills, and an AI-po
 
 ### 1. CrediTrust Complaint Assistant
 
-An AI-powered complaint analysis application that helps users explore and understand customer complaints through natural-language questions.
+An AI-powered complaint analysis application that helps users explore and understand consumer complaints through natural-language questions.
 
 **Key Features**
-- Processes and searches a dataset of more than 80,000 consumer complaints.
+- Processes more than 80,000 consumer complaints.
 - Uses Sentence Transformers to generate text embeddings.
 - Uses FAISS for semantic similarity search.
 - Retrieves relevant complaint information to support generated answers.
@@ -97,11 +105,11 @@ A data engineering project that collects, processes, classifies, and organizes d
 
 **Key Features**
 - Collects Telegram data using Telethon.
-- Uses YOLOv8 to classify images into categories such as promotional, product display, lifestyle, and other.
+- Uses YOLOv8 to classify images into categories.
 - Stores structured data in PostgreSQL.
 - Uses dbt for data transformation.
 - Uses FastAPI to expose data through REST endpoints.
-- Uses Dagster for data pipeline orchestration.
+- Uses Dagster for workflow orchestration.
 - Supports containerized development with Docker.
 
 **Technologies**
@@ -157,20 +165,22 @@ The frontend is built with Next.js, TypeScript, and Tailwind CSS.
 - Sections for About, Skills, Experience, Projects, and Contact.
 - Downloadable CVs and certificate.
 - Integrated AI assistant interface.
+- Contact form with backend integration.
 
 ### AI-Powered Portfolio Assistant
 
-The portfolio assistant allows visitors to ask questions about my skills, projects, technical background, and training.
+The assistant allows visitors to ask questions about my skills, projects, technical background, and training.
 
 **Architecture and Implementation**
 - Uses a structured portfolio knowledge base stored in `portfolio.json`.
 - Splits knowledge into smaller chunks for retrieval.
-- Generates 384-dimensional embeddings using Sentence Transformers.
+- Generates 768-dimensional embeddings using Google's `gemini-embedding-001` embedding model.
+- Uses retrieval-specific embedding task types for document and query embeddings.
 - Stores and searches embeddings using PostgreSQL with pgvector.
 - Retrieves relevant knowledge through semantic similarity search.
 - Uses FastAPI to provide backend API endpoints.
-- Integrates the Gemini API to generate natural-language responses.
-- Uses SDK-managed retry handling for temporary API errors.
+- Integrates the Gemini API for natural-language response generation.
+- Implements SDK-managed retry handling for temporary API errors.
 - Configures request timeouts and retry behavior.
 - Includes handling for unsupported or unrelated questions.
 
@@ -182,9 +192,48 @@ The portfolio assistant allows visitors to ask questions about my skills, projec
 - Python
 - PostgreSQL
 - pgvector
-- Sentence Transformers
+- Google Gemini Embedding API
 - Google Gemini API
 - Docker Compose
+
+### Backend Memory Optimization
+
+The portfolio assistant's retrieval architecture was migrated from a locally loaded Sentence Transformers model to Google's Gemini embedding API.
+
+This change:
+- Removed the need to load the Sentence Transformers model and PyTorch in the portfolio backend runtime.
+- Reduced heavyweight local model dependencies.
+- Uses pre-generated 768-dimensional embeddings.
+- Stores embeddings in PostgreSQL using pgvector.
+- Generates query embeddings through the Gemini API.
+
+The migration was implemented to reduce backend memory usage and improve compatibility with the available hosting resources.
+
+**Note:** The CrediTrust Complaint Assistant remains a separate project and continues to use Sentence Transformers, 384-dimensional embeddings, FAISS, and FLAN-T5-small.
+
+---
+
+## Production Deployment Architecture
+
+The portfolio is publicly deployed using separate hosting services.
+
+| Component | Technology | Hosting |
+|---|---|---|
+| Frontend | Next.js | Vercel |
+| Backend API | FastAPI | Render |
+| Database | PostgreSQL with pgvector | Neon |
+| AI response generation | Gemini API | Google AI |
+| Text embeddings | Gemini Embedding API | Google AI |
+| Source code | Git and GitHub | GitHub |
+
+### Production URLs
+
+- **Portfolio:** https://hawaebrahim.vercel.app
+- **Backend API:** https://ai-portfolio-txy2.onrender.com
+- **Backend health:** https://ai-portfolio-txy2.onrender.com/health
+- **Backend readiness:** https://ai-portfolio-txy2.onrender.com/ready
+
+The frontend communicates with the backend through the configured production API URL.
 
 ---
 
@@ -193,7 +242,6 @@ The portfolio assistant allows visitors to ask questions about my skills, projec
 Docker Compose is used to run the frontend, backend, and PostgreSQL database together.
 
 ### Prerequisites
-
 - Git
 - Docker Desktop
 - Docker Compose
@@ -213,13 +261,14 @@ Create the required backend environment file:
 backend/.env
 ```
 
-Add the required configuration:
+Configure the required environment variables using your own credentials and the database configuration expected by the project.
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
+DATABASE_URL=your_database_connection_string
 ```
 
-Use your own API key. Do not commit `.env` files or expose secret values in the repository.
+Use your own API key and database connection string. Never commit `.env` files or expose secret values in the repository.
 
 ### 3. Build and Start the Services
 
@@ -311,7 +360,7 @@ pip install -r requirements.txt
 
 Configure the required environment variables in `backend/.env`.
 
-Initialize the database:
+Initialize the database according to the project's database setup:
 
 ```bash
 python init_db.py
@@ -323,60 +372,55 @@ Start the backend:
 uvicorn main:app --reload
 ```
 
-Run backend tests:
+Run backend tests from the repository root:
 
 ```bash
-pytest -q
+python -m pytest backend/tests -v
 ```
 
 ---
 
 ## Testing and Verification
 
-The project has been checked through frontend builds, backend automated tests, and local Docker-based integration testing.
+The project has been checked through frontend builds, backend automated tests, and deployment verification.
 
 | Test / Verification | Result |
 |---|---|
 | Next.js production build | Passed |
-| Docker Compose configuration validation | Passed |
-| Docker frontend image build | Passed |
-| Docker backend image build | Passed |
-| PostgreSQL container health check | Passed |
-| FastAPI backend health check | Passed |
-| FastAPI documentation access | Passed |
-| Frontend local access | Passed |
-| Frontend-to-backend AI assistant integration | Passed |
-| Gemini response generation | Passed |
-| AI assistant relevant-question handling | Passed |
-| AI assistant backend-unavailable error handling | Passed |
-| Backend recovery after restart | Passed |
-| Simulated Gemini HTTP 503 retry test | Passed |
-| Backend automated test suite | 34 passed |
+| Backend automated test suite | 36 passed |
+| Gemini query embedding integration tests | Passed |
+| Embedding normalization tests | Passed |
+| Retrieval and grounding tests | Passed |
+| Gemini temporary HTTP 503 retry test | Passed |
+| Backend error handling tests | Passed |
+| Backend health endpoint | Passed |
+| Backend readiness endpoint | Passed |
+| Production database embedding verification | Passed |
+| Production frontend deployment | Live |
+| Production backend deployment | Live |
+| Frontend-to-backend AI assistant integration | Verified |
+| Contact form submission | Verified |
+| CV downloads and project links | Verified |
+| Responsive desktop and mobile layouts | Verified |
 
-**Latest recorded backend test result:** 34 passed, with 1 dependency deprecation warning.
+**Latest recorded backend test result:** 36 passed, with 1 Starlette deprecation warning.
 
-The local integration checks also confirmed that the application can recover after the backend is restarted and that the assistant can answer project-related questions.
+The AI assistant has also been tested through the public portfolio website and successfully answers questions about the portfolio projects.
 
 ---
 
 ## Development Roadmap
 
-The portfolio has been developed in stages:
+The portfolio was developed in the following stages:
 
 1. **Portfolio foundation:** Website structure, navigation, responsive layout, and theme support.
 2. **Professional content:** About, Skills, Experience, Projects, CVs, and contact information.
 3. **Backend development:** FastAPI endpoints and PostgreSQL integration.
 4. **AI knowledge base:** Knowledge preparation, chunking, embedding generation, and pgvector storage.
 5. **AI assistant integration:** Semantic retrieval, Gemini response generation, error handling, and testing.
-6. **Local deployment and verification:** Docker Compose setup and frontend/backend/database integration testing.
-
-### Next Milestone
-
-**Public production deployment**
-
-The next milestone is to deploy the frontend, backend, and database using suitable production hosting services, configure production environment variables, and verify the live application.
-
-Local Docker verification is complete; public deployment is still pending.
+6. **Memory optimization:** Migration to Gemini embeddings to reduce local model dependencies in the backend.
+7. **Production deployment:** Frontend deployment on Vercel, backend deployment on Render, and database hosting on Neon.
+8. **Production verification:** Testing the live AI assistant, contact form, downloadable CVs, project links, and responsive layouts.
 
 ---
 
@@ -416,11 +460,12 @@ ai-portfolio/
 
 ## Contact
 
-I welcome opportunities to contribute to AI engineering, machine learning, and full-stack software development projects.
+I welcome opportunities to contribute to AI engineering, machine learning, data engineering, and full-stack software development projects.
 
-- **GitHub:** [github.com/hawaebrahimhamid](https://github.com/hawaebrahimhamid)
-- **LinkedIn:** [linkedin.com/in/hawa-ebrahim-hamid](https://linkedin.com/in/hawa-ebrahim-hamid)
-- **Email:** [hawaebrahimhamid@gmail.com](mailto:hawaebrahimhamid@gmail.com)
+- **Portfolio:** https://hawaebrahim.vercel.app
+- **GitHub:** https://github.com/hawaebrahimhamid
+- **LinkedIn:** https://linkedin.com/in/hawa-ebrahim-hamid
+- **Email:** hawaebrahimhamid@gmail.com
 
 ---
 

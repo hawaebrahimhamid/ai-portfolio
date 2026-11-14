@@ -2,16 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
-import { Menu, ChevronDown } from "lucide-react";
+import { Menu, ChevronDown, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export default function Navbar() {
   const [activeSection, setActiveSection] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Select all sections with an id attribute
     const sections = document.querySelectorAll("section[id]");
 
     const observer = new IntersectionObserver(
@@ -23,14 +29,13 @@ export default function Navbar() {
         });
       },
       {
-        rootMargin: "-20% 0px -55% 0px", // Better viewport intersection margin
+        rootMargin: "-20% 0px -55% 0px",
         threshold: 0.1,
       },
     );
 
     sections.forEach((section) => observer.observe(section));
 
-    // Reset active highlight when scrolled back to the very top (Hero section)
     const handleScroll = () => {
       if (window.scrollY < 100) {
         setActiveSection("");
@@ -177,7 +182,7 @@ export default function Navbar() {
           <ThemeToggle />
 
           {/* Mobile / Tablet Menu */}
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger
               className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 transition-colors duration-200 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800 xl:hidden"
               aria-label="Open navigation menu"
@@ -187,9 +192,25 @@ export default function Navbar() {
 
             <SheetContent
               side="right"
-              className="w-[300px] border-slate-200 dark:border-slate-800"
+              className="w-[300px] border-slate-200 p-6 dark:border-slate-800 [&>button]:hidden"
             >
-              <nav className="mt-10 flex flex-col">
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+
+              {/* Custom Exact-Aligned Close Header */}
+              <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-slate-800">
+                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  Hawa
+                  <span className="text-blue-600 dark:text-blue-400">.dev</span>
+                </span>
+                <SheetClose
+                  className="absolute top-3 right-3 inline-flex size-9 items-center justify-center rounded-md hover:bg-accent"
+                  aria-label="Close menu"
+                >
+                  <X size={22} />
+                </SheetClose>
+              </div>
+
+              <nav className="mt-4 flex flex-col">
                 {/* Mobile Navigation */}
                 <div className="flex flex-col">
                   {navItems.map((item) => {
@@ -199,7 +220,8 @@ export default function Navbar() {
                       <a
                         key={item.href}
                         href={item.href}
-                        className={`border-b border-gray-100 py-4 text-base font-medium transition-colors dark:border-slate-800 ${
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`border-b border-gray-100 py-3.5 text-base font-medium transition-colors dark:border-slate-800 ${
                           isActive
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-gray-700 hover:text-blue-600 dark:text-gray-200 dark:hover:text-blue-400"
@@ -212,7 +234,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Mobile Social Links */}
-                <div className="mt-8 flex items-center gap-3">
+                <div className="mt-6 flex items-center gap-3">
                   <a
                     href="https://github.com/hawaebrahimhamid"
                     target="_blank"
@@ -235,7 +257,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Mobile Resume Options */}
-                <div className="mt-6 flex flex-col gap-3">
+                <div className="mt-6 flex flex-col gap-2.5">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
                     Choose a Resume
                   </p>
@@ -244,7 +266,7 @@ export default function Navbar() {
                     href="/resume.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-lg bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700"
+                    className="rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700"
                   >
                     AI Engineer & Full-Stack Developer Resume
                   </a>
@@ -253,7 +275,7 @@ export default function Navbar() {
                     href="/full-stack-engineer-resume.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-lg border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-700 dark:text-gray-200 dark:hover:bg-slate-800"
+                    className="rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-700 dark:text-gray-200 dark:hover:bg-slate-800"
                   >
                     Full-Stack Engineer Resume
                   </a>
@@ -262,7 +284,7 @@ export default function Navbar() {
                     href="/ai-ml-engineer-resume.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-lg border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-700 dark:text-gray-200 dark:hover:bg-slate-800"
+                    className="rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-700 dark:text-gray-200 dark:hover:bg-slate-800"
                   >
                     AI/ML Engineer Resume
                   </a>
