@@ -11,5 +11,9 @@ export type Project = {
     problem: string;
     approach: string;
     implementation: string;
+    engineeringDecisions?: string;
+    challenges?: string;
+    deployment?: string;
+    outcomes?: string;
   };
 };

@@ -13,51 +13,63 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
+const navItems = [
+  { label: "About", href: "#about" },
+  { label: "Skills", href: "#skills" },
+  { label: "Experience", href: "#experience" },
+  { label: "Projects", href: "#projects" },
+  { label: "Ask AI", href: "#ai-assistant" },
+  { label: "Contact", href: "#contact" },
+];
+
 export default function Navbar() {
   const [activeSection, setActiveSection] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const sections = document.querySelectorAll("section[id]");
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      {
-        rootMargin: "-20% 0px -55% 0px",
-        threshold: 0.1,
-      },
-    );
-
-    sections.forEach((section) => observer.observe(section));
-
     const handleScroll = () => {
       if (window.scrollY < 100) {
         setActiveSection("");
+        return;
+      }
+
+      // Check if scrolled to the very bottom of the page
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 40
+      ) {
+        setActiveSection(navItems[navItems.length - 1].href.slice(1));
+        return;
+      }
+
+      const scrollPosition = window.scrollY + 180;
+      let currentSection = "";
+
+      for (const item of navItems) {
+        const id = item.href.slice(1);
+        const element = document.getElementById(id);
+        if (element) {
+          const top = element.offsetTop;
+          const height = element.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            currentSection = id;
+            break;
+          }
+        }
+      }
+
+      if (currentSection) {
+        setActiveSection(currentSection);
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      observer.disconnect();
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  const navItems = [
-    { label: "About", href: "#about" },
-    { label: "Skills", href: "#skills" },
-    { label: "Experience", href: "#experience" },
-    { label: "Projects", href: "#projects" },
-    { label: "Ask AI", href: "#ai-assistant" },
-    { label: "Contact", href: "#contact" },
-  ];
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/90">
@@ -77,12 +89,14 @@ export default function Navbar() {
         <div className="hidden xl:flex items-center justify-center">
           <div className="flex items-center gap-7 2xl:gap-10">
             {navItems.map((item) => {
-              const isActive = activeSection === item.href.slice(1);
+              const sectionId = item.href.slice(1);
+              const isActive = activeSection === sectionId;
 
               return (
                 <a
                   key={item.href}
                   href={item.href}
+                  onClick={() => setActiveSection(sectionId)}
                   className={`group relative whitespace-nowrap px-1 py-2 text-[15px] font-medium transition-all duration-200 ${
                     isActive
                       ? "text-blue-600 dark:text-blue-400"
@@ -203,24 +217,28 @@ export default function Navbar() {
                   <span className="text-blue-600 dark:text-blue-400">.dev</span>
                 </span>
                 <SheetClose
-                  className="absolute top-3 right-3 inline-flex size-9 items-center justify-center rounded-md hover:bg-accent"
-                  aria-label="Close menu"
-                >
-                  <X size={22} />
-                </SheetClose>
+  className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-800"
+  aria-label="Close menu"
+>
+  <X size={22} />
+</SheetClose>
               </div>
 
               <nav className="mt-4 flex flex-col">
                 {/* Mobile Navigation */}
                 <div className="flex flex-col">
                   {navItems.map((item) => {
-                    const isActive = activeSection === item.href.slice(1);
+                    const sectionId = item.href.slice(1);
+                    const isActive = activeSection === sectionId;
 
                     return (
                       <a
                         key={item.href}
                         href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
+                        onClick={() => {
+                          setActiveSection(sectionId);
+                          setIsMobileMenuOpen(false);
+                        }}
                         className={`border-b border-gray-100 py-3.5 text-base font-medium transition-colors dark:border-slate-800 ${
                           isActive
                             ? "text-blue-600 dark:text-blue-400"
