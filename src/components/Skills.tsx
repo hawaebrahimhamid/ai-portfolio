@@ -19,6 +19,7 @@ import {
   SiVercel,
   SiRender,
   SiStreamlit,
+  SiTailwindcss,
 } from "react-icons/si";
 
 import {
@@ -36,7 +37,25 @@ import {
 } from "react-icons/tb";
 
 const skillIconMap: Record<string, ReactNode> = {
-  // Generative AI
+  // Programming Languages
+  Python: <SiPython className="h-6 w-6 text-[#3776AB]" />,
+  JavaScript: <SiJavascript className="h-6 w-6 text-[#F7DF1E]" />,
+  TypeScript: <SiTypescript className="h-6 w-6 text-[#3178C6]" />,
+
+  // Frontend Development
+  React: <SiReact className="h-6 w-6 text-[#61DAFB]" />,
+  "Next.js": <SiNextdotjs className="h-6 w-6 text-black dark:text-white" />,
+  "Tailwind CSS": <SiTailwindcss className="h-6 w-6 text-[#06B6D4]" />,
+
+  // Backend Development
+  Flask: <SiFlask className="h-6 w-6 text-black dark:text-white" />,
+  FastAPI: <SiFastapi className="h-6 w-6 text-[#009688]" />,
+  "REST APIs": (
+    <TbApi className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+  ),
+  SQLAlchemy: <TbDatabase className="h-6 w-6 text-red-600 dark:text-red-400" />,
+
+  // AI & Machine Learning
   RAG: <TbBrain className="h-6 w-6 text-purple-600 dark:text-purple-400" />,
   LLMs: <TbCpu className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />,
   "Text Embeddings": (
@@ -49,31 +68,27 @@ const skillIconMap: Record<string, ReactNode> = {
   "Prompt Engineering": (
     <TbPrompt className="h-6 w-6 text-rose-600 dark:text-rose-400" />
   ),
-
-  // Full-Stack Development
-  React: <SiReact className="h-6 w-6 text-[#61DAFB]" />,
-  "Next.js": <SiNextdotjs className="h-6 w-6 text-black dark:text-white" />,
-  JavaScript: <SiJavascript className="h-6 w-6 text-[#F7DF1E]" />,
-  TypeScript: <SiTypescript className="h-6 w-6 text-[#3178C6]" />,
-  Python: <SiPython className="h-6 w-6 text-[#3776AB]" />,
-  Flask: <SiFlask className="h-6 w-6 text-black dark:text-white" />,
-  FastAPI: <SiFastapi className="h-6 w-6 text-[#009688]" />,
-  "REST APIs": (
-    <TbApi className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+  "Gemini API": (
+    <TbBrain className="h-6 w-6 text-blue-600 dark:text-blue-400" />
   ),
-
-  // Data & Machine Learning
-  SQL: <TbDatabase className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
-  PostgreSQL: <SiPostgresql className="h-6 w-6 text-[#4169E1]" />,
-  Pandas: <SiPandas className="h-6 w-6 text-indigo-700 dark:text-indigo-300" />,
-  NumPy: <SiNumpy className="h-6 w-6 text-[#013243] dark:text-cyan-400" />,
   YOLOv8: <TbEye className="h-6 w-6 text-amber-500" />,
   PyMC: (
     <TbChartLine className="h-6 w-6 text-violet-600 dark:text-violet-400" />
   ),
+
+  // Data Engineering
+  Pandas: <SiPandas className="h-6 w-6 text-indigo-700 dark:text-indigo-300" />,
+  NumPy: <SiNumpy className="h-6 w-6 text-[#013243] dark:text-cyan-400" />,
   ETL: <TbDatabaseExport className="h-6 w-6 text-blue-500" />,
 
-  // Engineering & Deployment
+  // Databases
+  SQL: <TbDatabase className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
+  PostgreSQL: <SiPostgresql className="h-6 w-6 text-[#4169E1]" />,
+  pgvector: (
+    <TbVector className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+  ),
+
+  // Tools & Deployment
   Git: <SiGit className="h-6 w-6 text-[#F05032]" />,
   GitHub: <SiGithub className="h-6 w-6 text-black dark:text-white" />,
   Docker: <SiDocker className="h-6 w-6 text-[#2496ED]" />,
@@ -86,43 +101,55 @@ const skillIconMap: Record<string, ReactNode> = {
 
 const skillGroups = [
   {
-    title: "Generative AI & RAG",
+    title: "Programming Languages",
     description:
-      "Building language-model applications with semantic retrieval, embeddings, and evidence-grounded responses.",
+      "Writing application logic and developing software with Python and modern JavaScript and TypeScript.",
+    skills: ["Python", "JavaScript", "TypeScript"],
+  },
+  {
+    title: "Frontend Development",
+    description:
+      "Building responsive and interactive web interfaces with modern frontend frameworks and styling tools.",
+    skills: ["React", "Next.js", "Tailwind CSS"],
+  },
+  {
+    title: "Backend Development",
+    description:
+      "Developing backend services, database operations, application logic, and REST APIs.",
+    skills: ["Flask", "FastAPI", "REST APIs", "SQLAlchemy"],
+  },
+  {
+    title: "AI & Machine Learning",
+    description:
+      "Building retrieval-augmented applications and integrating language models and machine learning techniques.",
     skills: [
       "RAG",
       "LLMs",
+      "Gemini API",
       "Text Embeddings",
       "Sentence Transformers",
       "FAISS",
       "Prompt Engineering",
+      "YOLOv8",
+      "PyMC",
     ],
   },
   {
-    title: "Full-Stack Development",
+    title: "Data Engineering",
     description:
-      "Developing web applications and backend services with modern frontend frameworks, Python, and REST APIs.",
-    skills: [
-      "React",
-      "Next.js",
-      "JavaScript",
-      "TypeScript",
-      "Python",
-      "Flask",
-      "FastAPI",
-      "REST APIs",
-    ],
+      "Processing, transforming, and preparing data for analytical and machine learning workflows.",
+    skills: ["Pandas", "NumPy", "ETL"],
   },
   {
-    title: "Data & Machine Learning",
+    title: "Databases",
     description:
-      "Working with relational databases, data processing, machine learning workflows, and analytical applications.",
-    skills: ["SQL", "PostgreSQL", "Pandas", "NumPy", "YOLOv8", "PyMC", "ETL"],
+      "Working with relational databases, SQL, and vector storage for application data and semantic search.",
+    skills: ["SQL", "PostgreSQL", "pgvector"],
   },
   {
-    title: "Engineering & Deployment",
+    title: "Tools & Deployment",
     description:
-      "Applying version control, automated testing, containerization, and deployment tools to build and maintain applications.",
+      "Using version control, automated testing, containerization, and cloud platforms to develop and deploy applications.",
     skills: [
       "Git",
       "GitHub",
@@ -161,18 +188,18 @@ export default function Skills() {
           </h2>
 
           <p className="mt-5 text-base leading-7 text-gray-600 dark:text-gray-300 sm:text-lg">
-            My technical skills span Generative AI, full-stack development, data
-            processing, machine learning, and software deployment, supported by
-            hands-on project experience.
+            My technical skills span programming, full-stack development,
+            artificial intelligence, data engineering, and software deployment,
+            supported by hands-on project experience.
           </p>
         </div>
 
         {/* Skill categories */}
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:gap-8">
+        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-7">
           {skillGroups.map((group) => (
             <article
               key={group.title}
-              className="min-w-0 rounded-2xl border border-gray-200 bg-slate-50/70 p-6 shadow-sm transition-colors duration-200 hover:border-blue-300 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-blue-800 sm:p-8"
+              className="min-w-0 rounded-2xl border border-gray-200 bg-slate-50/70 p-6 shadow-sm transition-colors duration-200 hover:border-blue-300 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-blue-800"
             >
               <h3 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
                 {group.title}
