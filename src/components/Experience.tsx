@@ -1,3 +1,4 @@
+
 import { FiExternalLink } from "react-icons/fi";
 
 interface ExperienceItem {
@@ -15,12 +16,12 @@ const experiences: ExperienceItem[] = [
     period: "May 2026 – Present",
     location: "Addis Ababa, Ethiopia / Remote",
     description:
-      "Designing and developing applied AI and full-stack solutions, focusing on retrieval-augmented generation (RAG), vector search, and data pipelines.",
+      "Developing AI applications through hands-on projects, focusing on RAG systems, language models, semantic search, and data engineering.",
     highlights: [
-      "Built an AI-powered portfolio platform featuring an integrated RAG assistant using Next.js, FastAPI, PostgreSQL (pgvector), and Google Gemini API.",
-      "Developed a financial complaint RAG assistant utilizing Sentence Transformers, FAISS vector search, and FLAN-T5 for context-grounded answers.",
-      "Engineered a medical Telegram data pipeline with YOLOv8 image categorization, PostgreSQL warehousing, dbt transformations, and Dagster orchestration.",
-      "Created a Brent Oil analytics dashboard combining React, Flask, Python, and PyMC for Bayesian change-point results presentation.",
+      "Built an AI-powered portfolio platform with a RAG assistant using Next.js, FastAPI, PostgreSQL, pgvector, and Google Gemini.",
+      "Developed a financial complaint assistant using Python, Sentence Transformers, FAISS, and FLAN-T5.",
+      "Built a medical data pipeline using Telethon, YOLOv8, PostgreSQL, dbt, and Dagster.",
+      "Created a Brent Oil analytics dashboard using React, Flask, Python, and PyMC for Bayesian change-point analysis.",
     ],
   },
   {
@@ -28,25 +29,25 @@ const experiences: ExperienceItem[] = [
     period: "2024 – Present",
     location: "Addis Ababa, Ethiopia / Remote",
     description:
-      "Building robust web applications and RESTful APIs, combining responsive frontend interfaces with secure backend services and database integrations.",
+      "Building full-stack web applications by combining responsive frontend development, backend APIs, authentication, and database integration.",
     highlights: [
-      "Developed responsive user interfaces using React, Next.js, TypeScript, and Tailwind CSS.",
-      "Engineered scalable backend services and REST APIs with Python, Flask, and FastAPI.",
-      "Implemented database architectures and data workflows across PostgreSQL, Firebase, and Supabase.",
-      "Applied modern engineering practices including Git version control, Docker containerization, and automated testing.",
+      "Developed responsive web interfaces using React, Next.js, TypeScript, and Tailwind CSS.",
+      "Built backend services and REST APIs using Python, Flask, and FastAPI.",
+      "Implemented authentication, database integration, external API connections, and Stripe payment workflows in independent projects.",
+      "Applied Git, Docker, and automated testing during application development.",
     ],
   },
   {
-    role: "Kifiya AI Mastery Training Program — Graduated with Distinction",
+    role: "Kifiya AI Mastery Training Program — Completed with Distinction",
     period: "August 2026",
-    location: "10 Academy & Kifiya Financial Technology (Mastercard Foundation Partnership)",
+    location: "10 Academy & Kifiya Financial Technology",
     description:
-      "Completed an intensive 3-month (12-week) project-based fellowship with distinction, focused on Machine Learning Engineering, Data Engineering, Generative AI, and Financial Analysis for the fintech sector.",
+      "Completed AI and machine learning training with distinction, covering machine learning, data engineering, generative AI, and financial analysis.",
     certificateUrl: "/certificates/kifiya-ai-mastery.pdf",
     highlights: [
-      "Built and evaluated Generative AI and Retrieval-Augmented Generation (RAG) applications, including chatbot deployment, prompt/context engineering, and LLM fine-tuning.",
-      "Engineered scalable ETL/ELT pipelines, dbt transformations, and data warehouses using advanced Python and SQL.",
-      "Applied machine learning, predictive modeling, time-series analysis, and MLOps workflows (Docker, CI/CD, unit testing, DVC, MLFlow) across fintech projects.",
+      "Studied machine learning, predictive modeling, and practical AI development.",
+      "Worked with Python, SQL, data engineering workflows, and data warehousing concepts.",
+      "Explored RAG systems, generative AI, and financial analysis applications.",
     ],
   },
 ];
@@ -57,8 +58,8 @@ export default function Experience() {
       id="experience"
       className="border-t border-gray-200 py-20 dark:border-slate-800 sm:py-24"
     >
-      {/* Container width matched with other standard sections (max-w-7xl) and left-aligned header */}
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Section heading */}
         <div className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.15em] text-blue-600 dark:text-blue-400">
             My Background
@@ -74,14 +75,15 @@ export default function Experience() {
           </p>
         </div>
 
-        {/* Timeline Layout aligned cleanly across the section */}
-        <div className="mt-12 relative border-l border-gray-200 dark:border-slate-800 ml-4 sm:ml-6 space-y-10">
+        {/* Experience timeline */}
+        <div className="relative ml-4 mt-12 space-y-10 border-l border-gray-200 dark:border-slate-800 sm:ml-6">
           {experiences.map((experience) => (
             <div key={experience.role} className="relative pl-6 sm:pl-8">
-              {/* Timeline Bullet Node */}
+              {/* Timeline marker */}
               <div className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-4 border-white bg-blue-600 dark:border-slate-950 dark:bg-blue-500" />
 
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+                {/* Role and period */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
@@ -98,10 +100,12 @@ export default function Experience() {
                   </span>
                 </div>
 
+                {/* Description */}
                 <p className="mt-4 text-sm leading-7 text-gray-600 dark:text-gray-300 sm:text-base">
                   {experience.description}
                 </p>
 
+                {/* Key contributions */}
                 <ul className="mt-5 space-y-2.5">
                   {experience.highlights.map((highlight) => (
                     <li
@@ -114,6 +118,7 @@ export default function Experience() {
                   ))}
                 </ul>
 
+                {/* Certificate */}
                 {experience.certificateUrl && (
                   <div className="mt-6 border-t border-gray-100 pt-4 dark:border-slate-800">
                     <a
