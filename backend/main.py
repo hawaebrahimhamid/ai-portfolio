@@ -9,6 +9,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from database import SessionLocal, engine
+from email_service import send_contact_notification
 from starlette.middleware.body_limit import RequestBodyLimitMiddleware
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -283,6 +284,13 @@ def create_contact_message(
         logger.info(
             "contact_message_saved message_id=%s",
             new_message.id,
+        )
+
+        # Send an email notification after the database commit.
+        send_contact_notification(
+            name=new_message.name,
+            email=new_message.email,
+            message=new_message.message,
         )
 
         return new_message

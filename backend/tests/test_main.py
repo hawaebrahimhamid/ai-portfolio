@@ -1,11 +1,12 @@
 
-from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timezone
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import SQLAlchemyError
 
 import main
+
 
 get_db = main.get_db
 
@@ -55,6 +56,7 @@ class FakeDatabaseSession:
 @pytest.fixture
 def client():
     """Create a test client with a fake database session."""
+
     fake_db = FakeDatabaseSession()
 
     def override_get_db():
@@ -62,10 +64,16 @@ def client():
 
     main.app.dependency_overrides[get_db] = override_get_db
 
-    with TestClient(main.app) as test_client:
-        yield test_client
+    try:
+        with TestClient(main.app) as test_client:
+            yield test_client
+    finally:
+        main.app.dependency_overrides.clear()
 
-    main.app.dependency_overrides.clear()
+
+# -------------------------
+# Health and readiness tests
+# -------------------------
 
 
 def test_health_endpoint(client):
@@ -122,16 +130,42 @@ def test_readiness_endpoint_when_database_fails(client, monkeypatch):
     assert response.headers.get("X-Request-ID")
 
 
+# -------------------------
+# About endpoint tests
+# -------------------------
+
+
 def test_about_endpoint(client):
     response = client.get("/api/about")
 
     assert response.status_code == 200
+
     data = response.json()
+
     assert data["name"] == "Hawa Ebrahim Hamid"
     assert data["role"] == "AI Engineer & Full-Stack Developer"
 
 
-def test_valid_contact_message(client):
+# -------------------------
+# Contact endpoint tests
+# -------------------------
+
+
+def test_valid_contact_message(client, monkeypatch):
+    """Save a contact message and trigger an email notification."""
+
+    notification_calls = []
+
+    def fake_send_contact_notification(**kwargs):
+        notification_calls.append(kwargs)
+        return True
+
+    monkeypatch.setattr(
+        main,
+        "send_contact_notification",
+        fake_send_contact_notification,
+    )
+
     response = client.post(
         "/api/contact",
         json={
@@ -142,12 +176,54 @@ def test_valid_contact_message(client):
     )
 
     assert response.status_code == 201
+
     data = response.json()
+
     assert data["name"] == "Test Visitor"
     assert data["email"] == "visitor@example.com"
     assert data["message"] == "I am testing the portfolio contact API."
     assert "id" in data
     assert "created_at" in data
+
+    assert notification_calls == [
+        {
+            "name": "Test Visitor",
+            "email": "visitor@example.com",
+            "message": "I am testing the portfolio contact API.",
+        }
+    ]
+
+
+def test_contact_notification_failure_does_not_fail_submission(
+    client,
+    monkeypatch,
+):
+    """Keep the contact submission successful if email delivery fails."""
+
+    notification_calls = []
+
+    def fake_send_contact_notification(**kwargs):
+        notification_calls.append(kwargs)
+        return False
+
+    monkeypatch.setattr(
+        main,
+        "send_contact_notification",
+        fake_send_contact_notification,
+    )
+
+    response = client.post(
+        "/api/contact",
+        json={
+            "name": "Test Visitor",
+            "email": "visitor@example.com",
+            "message": "Testing notification failure handling.",
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["name"] == "Test Visitor"
+    assert len(notification_calls) == 1
 
 
 def test_whitespace_only_name_is_rejected(client):
@@ -213,8 +289,12 @@ def test_overlong_message_is_rejected(client):
 
     assert response.status_code == 422
 
-def test_database_error_returns_500_and_rolls_back():
+
+def test_database_error_returns_500_and_rolls_back(monkeypatch):
+    """Do not send an email when saving the contact message fails."""
+
     fake_db = FakeDatabaseSession()
+    notification_calls = []
 
     def override_get_db():
         yield fake_db
@@ -222,7 +302,18 @@ def test_database_error_returns_500_and_rolls_back():
     def fail_commit():
         raise SQLAlchemyError("Simulated database failure")
 
+    def fake_send_contact_notification(**kwargs):
+        notification_calls.append(kwargs)
+        return True
+
     fake_db.commit = fail_commit
+
+    monkeypatch.setattr(
+        main,
+        "send_contact_notification",
+        fake_send_contact_notification,
+    )
+
     main.app.dependency_overrides[get_db] = override_get_db
 
     try:
@@ -237,18 +328,25 @@ def test_database_error_returns_500_and_rolls_back():
             )
 
         assert response.status_code == 500
+
         assert response.json()["detail"] == (
             "Unable to save your message right now. "
             "Please try again."
         )
+
         assert fake_db.rolled_back is True
+
+        # Email must not be sent if the database commit fails.
+        assert notification_calls == []
 
     finally:
         main.app.dependency_overrides.clear()
 
+
 # -------------------------
 # AI chat endpoint tests
 # -------------------------
+
 
 def test_chat_endpoint_returns_answer(client, monkeypatch):
     """Return an answer when the assistant succeeds."""
@@ -294,7 +392,6 @@ def test_chat_endpoint_rejects_overlong_question(client):
     )
 
     assert response.status_code == 422
-
 
 
 def test_chat_endpoint_returns_503_on_unexpected_error(
@@ -347,12 +444,16 @@ def test_chat_endpoint_rejects_empty_assistant_answer(
     assert response.json()["detail"] == (
         "The assistant could not generate an answer. Please try again."
     )
+
+
 # -------------------------
 # Request observability tests
 # -------------------------
 
+
 def test_request_includes_request_id(client):
     """Every response should include a request ID."""
+
     response = client.get("/health")
 
     assert response.status_code == 200
@@ -361,6 +462,7 @@ def test_request_includes_request_id(client):
 
 def test_each_request_gets_a_unique_request_id(client):
     """Different requests should receive different request IDs."""
+
     first_response = client.get("/health")
     second_response = client.get("/health")
 
@@ -370,6 +472,7 @@ def test_each_request_gets_a_unique_request_id(client):
     assert first_request_id
     assert second_request_id
     assert first_request_id != second_request_id
+
 
 def test_request_body_limit_rejects_oversized_request(client):
     """Reject request bodies larger than 16 KiB with HTTP 413."""
@@ -385,8 +488,20 @@ def test_request_body_limit_rejects_oversized_request(client):
     assert response.status_code == 413
 
 
-def test_contact_rate_limit_returns_429(client):
+# -------------------------
+# Rate limit tests
+# -------------------------
+
+
+def test_contact_rate_limit_returns_429(client, monkeypatch):
     """Reject contact submissions after five requests per minute."""
+
+    # Prevent real Resend emails during this test.
+    monkeypatch.setattr(
+        main,
+        "send_contact_notification",
+        lambda **kwargs: True,
+    )
 
     main.limiter._storage.reset()
 
@@ -405,6 +520,7 @@ def test_contact_rate_limit_returns_429(client):
         response.status_code == 201
         for response in responses[:5]
     )
+
     assert responses[5].status_code == 429
 
 
@@ -433,4 +549,5 @@ def test_chat_rate_limit_returns_429(client, monkeypatch):
         response.status_code == 200
         for response in responses[:10]
     )
+
     assert responses[10].status_code == 429
