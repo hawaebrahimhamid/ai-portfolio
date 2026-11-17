@@ -6,3 +6,4 @@ pgvector
 google-genai
 psycopg[binary]
 slowapi==0.1.10
+resend
