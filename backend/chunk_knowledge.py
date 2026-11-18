@@ -2,7 +2,11 @@
 import json
 from pathlib import Path
 
-KNOWLEDGE_FILE = Path(__file__).parent / "knowledge" / "portfolio.json"
+KNOWLEDGE_FILE = (
+    Path(__file__).parent
+    / "knowledge"
+    / "portfolio.json"
+)
 
 
 def load_knowledge():
@@ -11,115 +15,270 @@ def load_knowledge():
         return json.load(file)
 
 
+def create_chunk(chunk_id, source, text, **metadata):
+    """Create a consistently structured knowledge chunk."""
+    return {
+        "chunk_id": chunk_id,
+        "source": source,
+        "text": text.strip(),
+        **metadata,
+    }
+
+
 def chunk_knowledge():
-    """Convert portfolio facts into searchable text chunks."""
+    """Convert portfolio information into searchable text chunks."""
     data = load_knowledge()
     chunks = []
 
+    # --------------------------------------------------
+    # 1. Portfolio owner and professional background
+    # --------------------------------------------------
+
     owner = data["portfolio_owner"]
 
-    # Include certificate and training-program information.
-    certification_text = ""
-    certifications = owner.get("certifications", [])
+    certification_details = []
 
-    if certifications:
-        certification_details = []
+    for cert in owner.get("certifications", []):
+        details = (
+            f"{cert['name']}. "
+            f"Provider: {cert['provider']}. "
+            f"Achievement: {cert['achievement']}. "
+            f"Issued: {cert['issued']}. "
+            f"Type: {cert['type']}."
+        )
 
-        for cert in certifications:
-            details = (
-                f"{cert['name']}. "
-                f"Provider: {cert['provider']}. "
-                f"Achievement: {cert['achievement']}. "
-                f"Issued: {cert['issued']}. "
-                f"Type: {cert['type']}."
-            )
+        topics = cert.get("topics", [])
 
-            topics = cert.get("topics", [])
-            if topics:
-                details += " Topics covered: " + ", ".join(topics) + "."
+        if topics:
+            details += " Topics covered: " + ", ".join(topics) + "."
 
-            certificate_path = cert.get("certificate_path")
-            if certificate_path:
-                details += f" Certificate file: {certificate_path}."
+        certificate_path = cert.get("certificate_path")
 
-            certification_details.append(details)
+        if certificate_path:
+            details += f" Certificate file: {certificate_path}."
 
-        certification_text = (
+        certification_details.append(details)
+
+    owner_text = (
+        f"{owner['name']} is a {owner['role']} based in "
+        f"{owner['location']}. "
+        f"Professional focus areas: "
+        f"{', '.join(owner['professional_focus'])}. "
+        f"{owner['experience_summary']}"
+    )
+
+    if certification_details:
+        owner_text += (
             " Training programs and certificates: "
             + " ".join(certification_details)
         )
 
-    # Owner profile now includes experience and certifications.
-    chunks.append({
-        "chunk_id": "owner-profile",
-        "source": "portfolio_owner",
-        "text": (
-            f"{owner['name']} is a {owner['role']} based in "
-            f"{owner['location']}. Professional focus areas: "
-            + ", ".join(owner["professional_focus"])
-            + ". "
-            + owner["experience_summary"]
-            + certification_text
-        ),
-    })
+    chunks.append(
+        create_chunk(
+            "owner-profile",
+            "portfolio_owner",
+            owner_text,
+        )
+    )
 
-    # Skills
-    for index, skill_group in enumerate(data["skills"]):
-        chunks.append({
-            "chunk_id": f"skills-{index + 1}",
-            "source": "skills",
-            "category": skill_group["category"],
-            "text": (
-                f"Skill category: {skill_group['category']}. "
-                "Technologies: "
-                + ", ".join(skill_group["technologies"])
-                + "."
-            ),
-        })
+    # --------------------------------------------------
+    # 2. Skills
+    # --------------------------------------------------
 
-    # Projects
+    for index, skill_group in enumerate(data["skills"], start=1):
+        category = skill_group["category"]
+
+        chunks.append(
+            create_chunk(
+                f"skills-{index}",
+                "skills",
+                (
+                    f"Skill category: {category}. "
+                    "Technologies: "
+                    + ", ".join(skill_group["technologies"])
+                    + "."
+                ),
+                category=category,
+            )
+        )
+
+    # --------------------------------------------------
+    # 3. Main portfolio projects
+    # --------------------------------------------------
+
     for project in data["projects"]:
-        project_text = (
-            f"Project: {project['name']}. "
+        project_id = project["id"]
+        project_name = project["name"]
+
+        overview_text = (
+            f"Project: {project_name}. "
             f"Description: {project['description']} "
             "Technologies: "
             + ", ".join(project["technologies"])
             + "."
         )
 
-        chunks.append({
-            "chunk_id": f"{project['id']}-overview",
-            "source": "project",
-            "project_id": project["id"],
-            "text": project_text,
-        })
+        chunks.append(
+            create_chunk(
+                f"{project_id}-overview",
+                "project",
+                overview_text,
+                project_id=project_id,
+            )
+        )
 
         for index, detail in enumerate(
-            project.get("implementation_details", [])
+            project.get("implementation_details", []),
+            start=1,
         ):
-            chunks.append({
-                "chunk_id": f"{project['id']}-detail-{index + 1}",
-                "source": "project",
-                "project_id": project["id"],
-                "text": f"Project: {project['name']}. {detail}",
-            })
+            chunks.append(
+                create_chunk(
+                    f"{project_id}-detail-{index}",
+                    "project",
+                    f"Project: {project_name}. {detail}",
+                    project_id=project_id,
+                )
+            )
 
-    # Current portfolio project
-    portfolio_project = data["current_portfolio_project"]
+    # --------------------------------------------------
+    # 4. Current AI Portfolio Platform
+    # --------------------------------------------------
 
-    chunks.append({
-        "chunk_id": "current-portfolio-project",
-        "source": "current_portfolio_project",
-        "text": (
-            f"Project: {portfolio_project['name']}. "
-            f"{portfolio_project['description']} "
-            "Completed backend features: "
-            + ", ".join(portfolio_project["completed_backend_features"])
-            + ". Planned AI features: "
-            + ", ".join(portfolio_project["planned_ai_features"])
-            + "."
+    portfolio = data["current_portfolio_project"]
+
+    portfolio_id = "ai-portfolio-platform"
+    portfolio_name = portfolio["name"]
+
+    portfolio_overview = (
+        f"Project: {portfolio_name}. "
+        f"{portfolio['description']} "
+        "Frontend technologies: "
+        + ", ".join(portfolio.get("frontend", []))
+        + ". Backend technologies: "
+        + ", ".join(portfolio.get("backend", []))
+        + "."
+    )
+
+    chunks.append(
+        create_chunk(
+            "current-portfolio-project",
+            "current_portfolio_project",
+            portfolio_overview,
+            project_id=portfolio_id,
+        )
+    )
+
+    # Each section gets its own searchable chunk.
+    portfolio_sections = [
+        (
+            "database",
+            "Database architecture",
+            "Database technologies",
         ),
-    })
+        (
+            "ai_technologies",
+            "AI technologies",
+            "AI technologies",
+        ),
+        (
+            "completed_backend_features",
+            "Implemented backend features",
+            "Completed backend features",
+        ),
+        (
+            "completed_ai_features",
+            "Implemented AI assistant features",
+            "Completed AI features",
+        ),
+        (
+            "architecture",
+            "System architecture",
+            "Architecture details",
+        ),
+        (
+            "deployment",
+            "Deployment architecture",
+            "Deployment details",
+        ),
+        (
+            "engineering_decisions",
+            "Engineering decisions",
+            "Engineering decisions",
+        ),
+        (
+            "testing",
+            "Testing and verification",
+            "Testing details",
+        ),
+        (
+            "limitations",
+            "Known limitations",
+            "Limitations",
+        ),
+    ]
+
+    for field, heading, description in portfolio_sections:
+        details = portfolio.get(field, [])
+
+        if not details:
+            continue
+
+        chunks.append(
+            create_chunk(
+                f"ai-portfolio-{field.replace('_', '-')}",
+                "current_portfolio_project",
+                (
+                    f"Project: {portfolio_name}. "
+                    f"{heading}: "
+                    + ". ".join(item.strip().rstrip(".") for item in details)
+                ),
+                project_id=portfolio_id,
+                category=field,
+            )
+        )
+
+    # --------------------------------------------------
+    # 5. Portfolio contributions
+    # --------------------------------------------------
+
+    contribution = portfolio.get("contribution")
+
+    if contribution:
+        chunks.append(
+            create_chunk(
+                "ai-portfolio-contributions",
+                "current_portfolio_project",
+                (
+                    f"Project: {portfolio_name}. "
+                    "Developer contributions: "
+                    f"{contribution}"
+                ),
+                project_id=portfolio_id,
+            )
+        )
+
+    # --------------------------------------------------
+    # 6. Validate generated chunks
+    # --------------------------------------------------
+
+    chunk_ids = [
+        chunk["chunk_id"]
+        for chunk in chunks
+    ]
+
+    if len(chunk_ids) != len(set(chunk_ids)):
+        raise ValueError("Duplicate knowledge chunk IDs detected.")
+
+    for chunk in chunks:
+        if not chunk["text"]:
+            raise ValueError(
+                f"Empty knowledge chunk detected: {chunk['chunk_id']}"
+            )
+
+        if len(chunk["chunk_id"]) > 150:
+            raise ValueError(
+                f"Chunk ID exceeds database limit: {chunk['chunk_id']}"
+            )
 
     return chunks
 
@@ -127,9 +286,10 @@ def chunk_knowledge():
 if __name__ == "__main__":
     chunks = chunk_knowledge()
 
-    print(f"Knowledge base loaded: {KNOWLEDGE_FILE}")
+    print(f"Knowledge source: {KNOWLEDGE_FILE}")
     print(f"Total chunks created: {len(chunks)}")
 
     for chunk in chunks:
         print(f"\n[{chunk['chunk_id']}]")
+        print(f"Source: {chunk['source']}")
         print(chunk["text"])

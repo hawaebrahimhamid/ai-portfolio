@@ -131,24 +131,68 @@
       "demo_url": "https://brent-oil-dashboard.vercel.app/"
     }
   ],
+
   "current_portfolio_project": {
-    "name": "AI Portfolio",
-    "description": "A portfolio website and backend API being developed to demonstrate AI engineering and full-stack development skills.",
+    "name": "AI Portfolio Platform",
+    "description": "A deployed full-stack portfolio platform featuring an AI-powered assistant that answers questions about Hawa's documented skills, projects, technical experience, and portfolio architecture using retrieval-augmented generation.",
     "frontend": ["Next.js", "TypeScript", "Tailwind CSS"],
-    "backend": ["Python", "FastAPI", "SQLAlchemy", "PostgreSQL"],
+    "backend": ["Python", "FastAPI", "SQLAlchemy"],
+    "database": ["PostgreSQL", "Neon", "pgvector"],
+    "ai_technologies": [
+      "Google Gemini API",
+      "Gemini Embedding",
+      "Retrieval-Augmented Generation",
+      "Semantic Search",
+      "Vector Embeddings"
+    ],
     "completed_backend_features": [
-      "Health endpoint",
+      "Health and readiness endpoints",
       "Portfolio information endpoint",
       "Validated contact form API",
       "PostgreSQL contact-message storage",
+      "Background email notification integration",
       "Automated backend tests"
     ],
-    "planned_ai_features": [
-      "Portfolio knowledge base",
-      "Text embeddings",
-      "PostgreSQL vector search with pgvector",
-      "Retrieval-augmented generation",
-      "LLM-powered portfolio assistant"
-    ]
+    "completed_ai_features": [
+      "Structured portfolio knowledge base stored in JSON",
+      "Knowledge chunking for retrieval",
+      "768-dimensional text embeddings using gemini-embedding-001",
+      "PostgreSQL vector storage using pgvector",
+      "Semantic retrieval using cosine distance",
+      "Gemini-powered response generation using gemini-3.5-flash-lite",
+      "Evidence-grounded prompt instructions",
+      "Input validation and error handling",
+      "SDK-configured retries for selected API errors"
+    ],
+    "architecture": [
+      "The Next.js frontend communicates with the FastAPI backend through API endpoints.",
+      "The backend uses SQLAlchemy to interact with PostgreSQL.",
+      "Portfolio knowledge is divided into chunks and represented as vector embeddings.",
+      "The assistant embeds visitor questions and retrieves relevant knowledge using pgvector cosine similarity.",
+      "Retrieved knowledge is supplied to Gemini to generate portfolio-related answers."
+    ],
+    "deployment": [
+      "Frontend deployed on Vercel",
+      "Backend API deployed on Render",
+      "PostgreSQL database hosted on Neon"
+    ],
+    "engineering_decisions": [
+      "Uses separate retrieval and generation stages to support evidence-grounded answers.",
+      "Uses 768-dimensional Gemini embeddings consistently for stored knowledge and visitor questions.",
+      "Uses cosine similarity for semantic retrieval.",
+      "Includes safeguards against inventing undocumented professional employment history.",
+      "Uses environment variables for deployment configuration and API credentials."
+    ],
+    "testing": [
+      "Backend automated test suite previously completed with 37 passing tests.",
+      "Production health and readiness endpoints were verified.",
+      "Production contact form submission and database storage were tested."
+    ],
+    "limitations": [
+      "The assistant can only provide reliable portfolio information that is documented in its knowledge base.",
+      "Retrieval relevance thresholds have not yet been finalized through the planned evaluation.",
+      "The Render free-tier backend may experience cold starts after periods of inactivity."
+    ],
+    "contribution": "Designed and implemented the portfolio frontend, backend API, database integration, knowledge-processing pipeline, vector retrieval, Gemini-powered assistant, contact functionality, automated tests, and deployment configuration."
   }
 }

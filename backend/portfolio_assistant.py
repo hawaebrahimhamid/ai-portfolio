@@ -7,7 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from database import SessionLocal
 from models import PortfolioKnowledge
@@ -152,6 +152,12 @@ PROJECT_NAMES = {
         "creditrust",
         "complaint assistant",
     ),
+    "ai-portfolio-platform": (
+        "ai portfolio platform",
+        "ai portfolio",
+        "portfolio assistant",
+        "portfolio website",
+    ),
 }
 
 PROJECT_KEYWORDS = (
@@ -270,9 +276,17 @@ def retrieve_knowledge(question: str) -> list[str]:
         )
 
         if is_project_question:
-            statement = statement.where(
-                PortfolioKnowledge.source == "project"
-            )
+
+            if selected_project_id == "ai-portfolio-platform":
+                statement = statement.where(
+                    PortfolioKnowledge.source
+                    == "current_portfolio_project"
+                )
+
+            else:
+                statement = statement.where(
+                    PortfolioKnowledge.source == "project"
+                )
 
         results = session.execute(
             statement.limit(TOP_K)
@@ -292,9 +306,18 @@ def retrieve_knowledge(question: str) -> list[str]:
             overview_statement = (
                 select(PortfolioKnowledge)
                 .where(
-                    PortfolioKnowledge.source == "project",
-                    PortfolioKnowledge.chunk_id.like(
-                        "%-overview"
+                    PortfolioKnowledge.source.in_(
+                        (
+                            "project",
+                            "current_portfolio_project",
+                        )
+                    ),
+                    or_(
+                        PortfolioKnowledge.chunk_id.like(
+                            "%-overview"
+                        ),
+                        PortfolioKnowledge.chunk_id
+                        == "current-portfolio-project",
                     ),
                 )
                 .order_by(
