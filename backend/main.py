@@ -5,15 +5,25 @@ import uuid
 from datetime import datetime
 
 import models
+from database import SessionLocal, engine
+from email_service import send_contact_notification
+from fastapi import (
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Request,
+    status,
+)
+from fastapi.middleware.cors import CORSMiddleware
+from portfolio_assistant import answer_question
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
-from database import SessionLocal, engine
-from email_service import send_contact_notification
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 from starlette.middleware.body_limit import RequestBodyLimitMiddleware
-from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.middleware.cors import CORSMiddleware
-from portfolio_assistant import answer_question
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -21,11 +31,12 @@ from pydantic import (
     Field,
     field_validator,
 )
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
 
-# Configure backend logging.
+
+# -------------------------
+# Logging configuration
+# -------------------------
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -39,6 +50,12 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 logger.propagate = False
+
+
+# -------------------------
+# FastAPI application
+# -------------------------
+
 app = FastAPI(
     title="Hawa's Portfolio API",
     description=(
@@ -48,22 +65,35 @@ app = FastAPI(
     version="1.1.0",
 )
 
-# Configure API rate limiting.
+
+# -------------------------
+# API rate limiting
+# -------------------------
+
 limiter = Limiter(key_func=get_remote_address)
+
 app.state.limiter = limiter
+
 app.add_exception_handler(
     RateLimitExceeded,
     _rate_limit_exceeded_handler,
 )
 
 
-# Limit incoming HTTP request bodies to 16 KiB.
+# -------------------------
+# Request body size limit
+# -------------------------
+
 app.add_middleware(
     RequestBodyLimitMiddleware,
     max_body_size=16 * 1024,
 )
 
-# Allow requests from local development and the production website.
+
+# -------------------------
+# CORS configuration
+# -------------------------
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -86,20 +116,23 @@ app.add_middleware(
 @app.middleware("http")
 async def observe_requests(request: Request, call_next):
     """Track request IDs, processing time, and HTTP outcomes."""
+
     request_id = str(uuid.uuid4())
     start_time = time.perf_counter()
 
     try:
         response = await call_next(request)
+
         duration_ms = round(
-            (time.perf_counter() - start_time) * 1000, 2
+            (time.perf_counter() - start_time) * 1000,
+            2,
         )
 
         response.headers["X-Request-ID"] = request_id
 
         logger.info(
             "request_completed request_id=%s method=%s path=%s "
-            "status_code=%s duration_ms=%s",
+            "status_code=%s duration_ms=%.2f",
             request_id,
             request.method,
             request.url.path,
@@ -111,13 +144,13 @@ async def observe_requests(request: Request, call_next):
 
     except Exception as exc:
         duration_ms = round(
-            (time.perf_counter() - start_time) * 1000, 2
+            (time.perf_counter() - start_time) * 1000,
+            2,
         )
 
-        # Log the exception type, not its message or request contents.
         logger.error(
             "request_failed request_id=%s method=%s path=%s "
-            "error_type=%s duration_ms=%s",
+            "error_type=%s duration_ms=%.2f",
             request_id,
             request.method,
             request.url.path,
@@ -134,9 +167,12 @@ async def observe_requests(request: Request, call_next):
 
 def get_db():
     """Provide a database session for each request."""
+
     db = SessionLocal()
+
     try:
         yield db
+
     finally:
         db.close()
 
@@ -156,8 +192,10 @@ class ContactMessageCreate(BaseModel):
     @classmethod
     def strip_text_fields(cls, value):
         """Remove leading and trailing whitespace."""
+
         if isinstance(value, str):
             return value.strip()
+
         return value
 
 
@@ -186,8 +224,10 @@ class ChatRequest(BaseModel):
     @classmethod
     def strip_question(cls, value):
         """Remove surrounding whitespace."""
+
         if isinstance(value, str):
             return value.strip()
+
         return value
 
 
@@ -197,6 +237,47 @@ class ChatResponse(BaseModel):
     answer: str
 
 
+# -------------------------
+# Background email notification
+# -------------------------
+
+def send_contact_notification_background(
+    name: str,
+    email: str,
+    message: str,
+):
+    """Send the contact notification after the API response."""
+
+    email_start = time.perf_counter()
+
+    try:
+        email_sent = send_contact_notification(
+            name=name,
+            email=email,
+            message=message,
+        )
+
+        duration_ms = (
+            time.perf_counter() - email_start
+        ) * 1000
+
+        if email_sent:
+            logger.info(
+                "contact_email_notification_completed duration_ms=%.2f",
+                duration_ms,
+            )
+        else:
+            logger.warning(
+                "contact_email_notification_not_sent duration_ms=%.2f",
+                duration_ms,
+            )
+
+    except Exception as exc:
+        logger.error(
+            "contact_email_background_failed error_type=%s",
+            type(exc).__name__,
+        )
+
 
 # -------------------------
 # Health and readiness endpoints
@@ -205,6 +286,7 @@ class ChatResponse(BaseModel):
 @app.get("/health", tags=["Health"])
 def health_check():
     """Check whether the API process is responding."""
+
     return {
         "status": "healthy",
         "message": "Portfolio API is running successfully.",
@@ -214,6 +296,7 @@ def health_check():
 @app.get("/ready", tags=["Health"])
 def readiness_check():
     """Check whether the API can reach its database."""
+
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
@@ -236,6 +319,7 @@ def readiness_check():
 @app.get("/api/about", tags=["Portfolio"])
 def get_about():
     """Return basic portfolio information."""
+
     return {
         "name": "Hawa Ebrahim Hamid",
         "role": "AI Engineer & Full-Stack Developer",
@@ -253,7 +337,6 @@ def get_about():
 # Contact form endpoint
 # -------------------------
 
-
 @app.post(
     "/api/contact",
     response_model=ContactMessageResponse,
@@ -264,9 +347,9 @@ def get_about():
 def create_contact_message(
     request: Request,
     contact: ContactMessageCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-
     """Validate and save a contact message to PostgreSQL."""
 
     new_message = models.ContactMessage(
@@ -277,20 +360,43 @@ def create_contact_message(
 
     try:
         db.add(new_message)
+
+        # Measure database commit time.
+        db_start = time.perf_counter()
+
         db.commit()
+
+        logger.info(
+            "contact_database_commit_completed duration_ms=%.2f",
+            (time.perf_counter() - db_start) * 1000,
+        )
+
+        # Refresh the saved record to obtain generated values.
+        refresh_start = time.perf_counter()
+
         db.refresh(new_message)
 
-        # Do not log the contact's name, email, or message.
+        logger.info(
+            "contact_database_refresh_completed duration_ms=%.2f",
+            (time.perf_counter() - refresh_start) * 1000,
+        )
+
         logger.info(
             "contact_message_saved message_id=%s",
             new_message.id,
         )
 
-        # Send an email notification after the database commit.
-        send_contact_notification(
+        # Schedule email notification after the response.
+        background_tasks.add_task(
+            send_contact_notification_background,
             name=new_message.name,
             email=new_message.email,
             message=new_message.message,
+        )
+
+        logger.info(
+            "contact_email_notification_scheduled message_id=%s",
+            new_message.id,
         )
 
         return new_message
@@ -298,8 +404,6 @@ def create_contact_message(
     except SQLAlchemyError as exc:
         db.rollback()
 
-        # Avoid logging database exception details that might
-        # contain SQL statements or submitted data.
         logger.error(
             "contact_message_save_failed error_type=%s",
             type(exc).__name__,
@@ -318,7 +422,6 @@ def create_contact_message(
 # AI portfolio chat endpoint
 # -------------------------
 
-
 @app.post(
     "/api/chat",
     response_model=ChatResponse,
@@ -333,7 +436,6 @@ def chat_with_portfolio(
 
     question = chat_request.question.strip()
 
-
     if not question:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -345,7 +447,9 @@ def chat_with_portfolio(
     try:
         answer = answer_question(question)
 
-        duration_ms = (time.perf_counter() - start_time) * 1000
+        duration_ms = (
+            time.perf_counter() - start_time
+        ) * 1000
 
         logger.info(
             "portfolio_chat_completed duration_ms=%.2f",
@@ -367,7 +471,6 @@ def chat_with_portfolio(
         raise
 
     except Exception as exc:
-        # Do not log the question, answer, or exception message.
         logger.error(
             "portfolio_chat_failed error_type=%s",
             type(exc).__name__,

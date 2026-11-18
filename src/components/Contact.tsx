@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { FiArrowUpRight, FiMail, FiSend } from "react-icons/fi";
+import { FiArrowUpRight, FiMail, FiSend, FiLoader } from "react-icons/fi";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 
 const contactLinks = [
@@ -217,10 +217,24 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={isSubmitting}
+                aria-busy={isSubmitting}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <FiSend aria-hidden="true" size={18} />
-                {isSubmitting ? "Sending..." : "Send Message"}
+                {isSubmitting ? (
+                  <>
+                    <FiLoader
+                      aria-hidden="true"
+                      size={18}
+                      className="animate-spin"
+                    />
+                    <span>Sending message...</span>
+                  </>
+                ) : (
+                  <>
+                    <FiSend aria-hidden="true" size={18} />
+                    <span>Send Message</span>
+                  </>
+                )}
               </button>
             </form>
           </div>
