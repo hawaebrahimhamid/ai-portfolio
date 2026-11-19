@@ -84,6 +84,7 @@ const skillIconMap: Record<string, ReactNode> = {
   // Databases
   SQL: <TbDatabase className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
   PostgreSQL: <SiPostgresql className="h-6 w-6 text-[#4169E1]" />,
+  Neon: <SiPostgresql className="h-6 w-6 text-[#00E599]" />,
   pgvector: (
     <TbVector className="h-6 w-6 text-purple-600 dark:text-purple-400" />
   ),
@@ -144,7 +145,7 @@ const skillGroups = [
     title: "Databases",
     description:
       "Working with relational databases, SQL, and vector storage for application data and semantic search.",
-    skills: ["SQL", "PostgreSQL", "pgvector"],
+    skills: ["SQL", "PostgreSQL", "Neon", "pgvector"],
   },
   {
     title: "Tools & Deployment",
